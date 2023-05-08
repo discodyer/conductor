@@ -29,7 +29,7 @@ class ArduCopter(BaseDrone):
     def land(self):
         "降落"
         print(f"{self.name} is landing.")
-        # Do sth. to landing
+        self.v.mode = VehicleMode("LAND")
 
     def set_mode(self, mode):
         "设置飞行模式,一般用 'GUIDED' 模式操作"
@@ -95,4 +95,9 @@ class ArduCopter(BaseDrone):
         pass
 
     def pos_ctrl(self):
+        pass
+
+    def close(self):
+        # 退出之前，清除vehicle对象
+        self.v.close()
         pass
