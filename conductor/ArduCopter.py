@@ -1,5 +1,5 @@
 import time
-from dronekit import connect, VehicleMode, LocationGlobalRelative, Vehicle
+from dronekit import connect, VehicleMode, LocationGlobalRelative, Vehicle, mavutil
 from .BaseDrone import BaseDrone
 
 class ArduCopter(BaseDrone):
@@ -91,11 +91,29 @@ class ArduCopter(BaseDrone):
             # 等待1s
             time.sleep(1)
 
-    def vel_ctrl(self):
+    def velocity_control(self):
         pass
 
-    def pos_ctrl(self):
-        pass
+    def send_ned_velocity(self, velocity_x, velocity_y, velocity_z):
+        """
+        Move vehicle in direction based on specified velocity vectors.
+        """
+        msg = self.v.message_factory.set_position_target_local_ned_encode(
+            0,       # time_boot_ms (not used)
+            0, 0,    # target system, target component
+            mavutil.mavlink.MAV_FRAME_LOCAL_NED, # frame
+            0b0000111111000111, # type_mask (only speeds enabled)
+            0, 0, 0, # x, y, z positions (not used)
+            velocity_x, velocity_y, velocity_z, # x, y, z velocity in m/s
+            0, 0, 0, # x, y, z acceleration (not supported yet, ignored in GCS_Mavlink)
+            0, 0)    # yaw, yaw_rate (not supported yet, ignored in GCS_Mavlink)
+
+        # send command to vehicle
+        self.v.send_mavlink(msg)
+
+    def position_control(self, velocity_x, velocity_y, velocity_z, duration):
+        
+        self.send_ned_velocity(velocity_x, velocity_y, velocity_z)
 
     def close(self):
         # 退出之前，清除vehicle对象
