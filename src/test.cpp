@@ -9,31 +9,42 @@
 #include <mavros_msgs/CommandBool.h>
 #include <mavros_msgs/SetMode.h>
 #include <mavros_msgs/State.h>
+#include <mavros_msgs/CommandTOL.h>
 
 mavros_msgs::State current_state;
-void state_cb(const mavros_msgs::State::ConstPtr& msg){
+void state_cb(const mavros_msgs::State::ConstPtr &msg)
+{
     current_state = *msg;
 }
+
+enum state
+{
+    prearm,
+    arm,
+    takeoff,
+    land
+};
 
 int main(int argc, char **argv)
 {
     ros::init(argc, argv, "guided_node");
     ros::NodeHandle nh;
 
-    ros::Subscriber state_sub = nh.subscribe<mavros_msgs::State>
-            ("mavros/state", 10, state_cb);
-    ros::Publisher local_pos_pub = nh.advertise<geometry_msgs::PoseStamped>
-            ("mavros/setpoint_position/local", 10);
-    ros::ServiceClient arming_client = nh.serviceClient<mavros_msgs::CommandBool>
-            ("mavros/cmd/arming");
-    ros::ServiceClient set_mode_client = nh.serviceClient<mavros_msgs::SetMode>
-            ("mavros/set_mode");
+    ros::Subscriber state_sub = nh.subscribe<mavros_msgs::State>("mavros/state", 10, state_cb);
+    ros::Publisher local_pos_pub = nh.advertise<geometry_msgs::PoseStamped>("mavros/setpoint_position/local", 10);
+    ros::ServiceClient arming_client = nh.serviceClient<mavros_msgs::CommandBool>("mavros/cmd/arming");
+    ros::ServiceClient set_mode_client = nh.serviceClient<mavros_msgs::SetMode>("mavros/set_mode");
+    ros::ServiceClient takeoff_client = nh.serviceClient<mavros_msgs::CommandTOL>("mavros/cmd/takeoff");
+    ros::ServiceClient land_client = nh.serviceClient<mavros_msgs::CommandTOL>("mavros/cmd/land");
 
-    //the setpoint publishing rate MUST be faster than 2Hz
+    // the setpoint publishing rate MUST be faster than 2Hz
     ros::Rate rate(20.0);
 
+    state drone_state = prearm;
+
     // wait for FCU connection
-    while(ros::ok() && !current_state.connected){
+    while (ros::ok() && !current_state.connected)
+    {
         ros::spinOnce();
         rate.sleep();
     }
@@ -43,12 +54,13 @@ int main(int argc, char **argv)
     pose.pose.position.y = 0;
     pose.pose.position.z = 1;
 
-    //send a few setpoints before starting
-    for(int i = 100; ros::ok() && i > 0; --i){
-        local_pos_pub.publish(pose);
-        ros::spinOnce();
-        rate.sleep();
-    }
+    // send a few setpoints before starting
+    // for (int i = 100; ros::ok() && i > 0; --i)
+    // {
+    //     local_pos_pub.publish(pose);
+    //     ros::spinOnce();
+    //     rate.sleep();
+    // }
 
     mavros_msgs::SetMode set_mode_guided;
     set_mode_guided.request.custom_mode = "GUIDED";
@@ -56,28 +68,86 @@ int main(int argc, char **argv)
     mavros_msgs::CommandBool arm_cmd;
     arm_cmd.request.value = true;
 
+    mavros_msgs::CommandTOL takeoff_cmd;
+    takeoff_cmd.request.altitude = 1;
+
     ros::Time last_request = ros::Time::now();
 
-    while(ros::ok()){
-        if( current_state.mode != "GUIDED" &&
-            (ros::Time::now() - last_request > ros::Duration(5.0))){
-            if( set_mode_client.call(set_mode_guided) &&
-                set_mode_guided.response.mode_sent){
-                ROS_INFO("Guided enabled");
-            }
-            last_request = ros::Time::now();
-        } else {
-            if( !current_state.armed &&
-                (ros::Time::now() - last_request > ros::Duration(5.0))){
-                if( arming_client.call(arm_cmd) &&
-                    arm_cmd.response.success){
-                    ROS_INFO("Vehicle armed");
+    while (ros::ok())
+    {
+        switch (drone_state)
+        {
+        case prearm:
+            if (current_state.mode != "GUIDED" &&
+                (ros::Time::now() - last_request > ros::Duration(5.0)))
+            {
+                if (set_mode_client.call(set_mode_guided) &&
+                    set_mode_guided.response.mode_sent)
+                {
+                    ROS_INFO("Guided enabled");
+                    drone_state = arm;
                 }
                 last_request = ros::Time::now();
             }
-        }
+            break;
 
-        local_pos_pub.publish(pose);
+        case arm:
+            if (!current_state.armed &&
+                (ros::Time::now() - last_request > ros::Duration(5.0)))
+            {
+                if (arming_client.call(arm_cmd) &&
+                    arm_cmd.response.success)
+                {
+                    ROS_INFO("Vehicle armed!");
+                    drone_state = takeoff;
+                }
+                else
+                {
+                    ROS_INFO("Vehicle arm failed!");
+                    drone_state = prearm;
+                }
+                last_request = ros::Time::now();
+            }
+            break;
+
+        case takeoff:
+            if (takeoff_client.call(takeoff_cmd) &&
+                (ros::Time::now() - last_request > ros::Duration(3.0)))
+            {
+                ROS_INFO("Vehicle Takeoff!");
+                drone_state = land;
+            }
+            else
+            {
+                ROS_INFO("Vehicle Takeoff Failed!");
+            }
+            if (!current_state.armed)
+            {
+                drone_state = arm;
+            }
+            last_request = ros::Time::now();
+
+            break;
+
+        case land:
+            if (!current_state.armed &&
+                (ros::Time::now() - last_request > ros::Duration(5.0)))
+            {
+                mavros_msgs::CommandTOL land_cmd;
+                if (land_client.call(land_cmd) &&
+                    land_cmd.response.success)
+                    {
+                        ROS_INFO("Vehicle landed!");
+                        drone_state = prearm;
+                        ros::shutdown();
+                    }
+                last_request = ros::Time::now();
+            }
+            break;
+
+        default:
+            break;
+        }
 
         ros::spinOnce();
         rate.sleep();

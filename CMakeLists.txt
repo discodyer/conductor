@@ -188,6 +188,10 @@ target_link_libraries(takeoff ${catkin_LIBRARIES})
 install(TARGETS takeoff
    RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
  )
+
+catkin_install_python(PROGRAMS src/beeper.py
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
 ## Mark libraries for installation
 ## See http://docs.ros.org/melodic/api/catkin/html/howto/format1/building_libraries.html
 # install(TARGETS ${PROJECT_NAME}
