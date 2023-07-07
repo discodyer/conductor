@@ -104,7 +104,8 @@ int main(int argc, char **argv)
             break;
 
         case takeoff:
-            if (takeoff_client.call(takeoff_cmd))
+            if (!takeoff_client.call(takeoff_cmd)&&
+                (ros::Time::now() - last_request > ros::Duration(1.0)))
             {
                 ROS_INFO("Vehicle Takeoff!");
                 drone_state = land;
