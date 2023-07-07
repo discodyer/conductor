@@ -11,23 +11,6 @@
 #include <mavros_msgs/State.h>
 #include <mavros_msgs/CommandTOL.h>
 #include <conductor/mission_state.hpp>
-#include "signal.h" //necessary for the Custom SIGINT handler
-#include "stdio.h"  //necessary for the Custom SIGINT handler
-
-// 定义一个安全的SIGINT处理函数
-void safeSigintHandler(int sig, siginfo_t *info, void *myact)
-{
-    // 从sival_ptr中获取land_client
-    ros::ServiceClient& land_client = *(ros::ServiceClient*)(info->si_value.sival_ptr);
-    // 停止运动并降落
-    mavros_msgs::CommandTOL land_cmd;
-    if (land_client.call(land_cmd) &&
-        land_cmd.response.success)
-    {
-        ROS_INFO("Vehicle landed!");
-    }
-    ros::shutdown();
-}
 
 mavros_msgs::State current_state;
 void state_cb(const mavros_msgs::State::ConstPtr &msg)
@@ -37,7 +20,7 @@ void state_cb(const mavros_msgs::State::ConstPtr &msg)
 
 int main(int argc, char **argv)
 {
-    ros::init(argc, argv, "guided_node", ros::init_options::NoSigintHandler);
+    ros::init(argc, argv, "guided_node");
     ros::NodeHandle nh;
 
     ros::Subscriber state_sub = nh.subscribe<mavros_msgs::State>("mavros/state", 10, state_cb);
@@ -46,19 +29,6 @@ int main(int argc, char **argv)
     ros::ServiceClient set_mode_client = nh.serviceClient<mavros_msgs::SetMode>("mavros/set_mode");
     ros::ServiceClient takeoff_client = nh.serviceClient<mavros_msgs::CommandTOL>("mavros/cmd/takeoff");
     ros::ServiceClient land_client = nh.serviceClient<mavros_msgs::CommandTOL>("mavros/cmd/land");
-
-// 定义并注册信号和信号处理函数
-// #define _POSIX_C_SOURCE 199309L // 添加这一行
-    struct sigaction act;
-    union sigval mysigval;
-    mysigval.sival_ptr = &land_client; // 将land_client的地址赋给sival_ptr
-    sigemptyset(&act.sa_mask);
-    act.sa_sigaction = safeSigintHandler; // 设置信号处理函数
-    act.sa_flags = SA_SIGINFO;            // 开启信息传递开关
-    if (sigaction(SIGINT, &act, NULL) < 0)
-    {
-        printf("install signal error\n");
-    }
 
     // the setpoint publishing rate MUST be faster than 2Hz
     ros::Rate rate(50.0);
@@ -112,6 +82,13 @@ int main(int argc, char **argv)
                 }
                 last_request = ros::Time::now();
             }
+            else if (current_state.mode == "GUIDED" &&
+                     (ros::Time::now() - last_request > ros::Duration(5.0)))
+            {
+                ROS_INFO("Guided enabled");
+                drone_state = arm;
+                last_request = ros::Time::now();
+            }
             break;
 
         case arm:
@@ -134,7 +111,8 @@ int main(int argc, char **argv)
             break;
 
         case takeoff:
-            if (!takeoff_client.call(takeoff_cmd) &&
+            
+            if (takeoff_client.call(takeoff_cmd) &&
                 (ros::Time::now() - last_request > ros::Duration(1.0)))
             {
                 ROS_INFO("Vehicle Takeoff!");
