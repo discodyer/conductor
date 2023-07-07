@@ -12,11 +12,13 @@
 #include <mavros_msgs/CommandTOL.h>
 #include <conductor/mission_state.hpp>
 #include "signal.h" //necessary for the Custom SIGINT handler
-#include "stdio.h" //necessary for the Custom SIGINT handler
+#include "stdio.h"  //necessary for the Custom SIGINT handler
 
 // 定义一个安全的SIGINT处理函数
-void safeSigintHandler(int sig, ros::ServiceClient& land_client)
+void safeSigintHandler(int sig, siginfo_t *info, void *myact)
 {
+    // 从sival_ptr中获取land_client
+    ros::ServiceClient& land_client = *(ros::ServiceClient*)(info->si_value.sival_ptr);
     // 停止运动并降落
     mavros_msgs::CommandTOL land_cmd;
     if (land_client.call(land_cmd) &&
@@ -45,23 +47,18 @@ int main(int argc, char **argv)
     ros::ServiceClient takeoff_client = nh.serviceClient<mavros_msgs::CommandTOL>("mavros/cmd/takeoff");
     ros::ServiceClient land_client = nh.serviceClient<mavros_msgs::CommandTOL>("mavros/cmd/land");
 
-    // 注册自定义SIGINT处理函数
-    // 定义一个std::function对象
-    std::function<void(int)> handler = [&land_client](int sig){ safeSigintHandler(sig, land_client); };
-
-    // 在注册时使用std::function::target方法
-    auto func_ptr = handler.target<void(*)(int)>();
-    if (func_ptr) // 检查是否返回了有效的函数指针
+// 定义并注册信号和信号处理函数
+// #define _POSIX_C_SOURCE 199309L // 添加这一行
+    struct sigaction act;
+    union sigval mysigval;
+    mysigval.sival_ptr = &land_client; // 将land_client的地址赋给sival_ptr
+    sigemptyset(&act.sa_mask);
+    act.sa_sigaction = safeSigintHandler; // 设置信号处理函数
+    act.sa_flags = SA_SIGINFO;            // 开启信息传递开关
+    if (sigaction(SIGINT, &act, NULL) < 0)
     {
-        signal(SIGINT, *func_ptr);
+        printf("install signal error\n");
     }
-    else // 如果没有，打印错误信息
-    {
-        std::cerr << "Invalid handler function\n";
-    }
-
-
-    // signal(SIGINT, [&land_client](int sig){ safeSigintHandler(sig, land_client); });
 
     // the setpoint publishing rate MUST be faster than 2Hz
     ros::Rate rate(50.0);
