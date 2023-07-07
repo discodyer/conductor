@@ -177,9 +177,8 @@ int main(int argc, char **argv)
 
         ros::spinOnce();
         rate.sleep();
-        // 在循环结束后调用ros::shutdown()
-        ros::shutdown();
     }
-
+    // 在循环结束后调用ros::shutdown()
+    ros::shutdown();
     return 0;
 }
