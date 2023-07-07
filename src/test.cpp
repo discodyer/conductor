@@ -11,6 +11,25 @@
 #include <mavros_msgs/State.h>
 #include <mavros_msgs/CommandTOL.h>
 #include <conductor/mission_state.hpp>
+#include "signal.h" //necessary for the Custom SIGINT handler
+#include "stdio.h"  //necessary for the Custom SIGINT handler
+
+// 定义一个安全的SIGINT处理函数
+void safeSigintHandler(int sig)
+{
+    // 创建一个临时的节点句柄
+    ros::NodeHandle nh;
+    // 创建一个降落服务客户端
+    ros::ServiceClient land_client = nh.serviceClient<mavros_msgs::CommandTOL>("mavros/cmd/land");
+    // 停止运动并降落
+    mavros_msgs::CommandTOL land_cmd;
+    if (land_client.call(land_cmd) &&
+        land_cmd.response.success)
+    {
+        ROS_INFO("Vehicle landed!");
+    }
+    ros::shutdown();
+}
 
 mavros_msgs::State current_state;
 void state_cb(const mavros_msgs::State::ConstPtr &msg)
@@ -20,8 +39,10 @@ void state_cb(const mavros_msgs::State::ConstPtr &msg)
 
 int main(int argc, char **argv)
 {
-    ros::init(argc, argv, "guided_node");
+    ros::init(argc, argv, "guided_node", ros::init_options::NoSigintHandler);
     ros::NodeHandle nh;
+
+    signal(SIGINT, safeSigintHandler);
 
     ros::Subscriber state_sub = nh.subscribe<mavros_msgs::State>("mavros/state", 10, state_cb);
     ros::Publisher local_pos_pub = nh.advertise<geometry_msgs::PoseStamped>("mavros/setpoint_position/local", 10);
@@ -111,7 +132,7 @@ int main(int argc, char **argv)
             break;
 
         case takeoff:
-            
+
             if (takeoff_client.call(takeoff_cmd) &&
                 (ros::Time::now() - last_request > ros::Duration(1.0)))
             {
