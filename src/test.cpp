@@ -10,20 +10,13 @@
 #include <mavros_msgs/SetMode.h>
 #include <mavros_msgs/State.h>
 #include <mavros_msgs/CommandTOL.h>
+#include <conductor/mission_state.hpp>
 
 mavros_msgs::State current_state;
 void state_cb(const mavros_msgs::State::ConstPtr &msg)
 {
     current_state = *msg;
 }
-
-enum state
-{
-    prearm,
-    arm,
-    takeoff,
-    land
-};
 
 int main(int argc, char **argv)
 {
@@ -38,9 +31,9 @@ int main(int argc, char **argv)
     ros::ServiceClient land_client = nh.serviceClient<mavros_msgs::CommandTOL>("mavros/cmd/land");
 
     // the setpoint publishing rate MUST be faster than 2Hz
-    ros::Rate rate(20.0);
+    ros::Rate rate(50.0);
 
-    state drone_state = prearm;
+    mission_state drone_state = prearm;
 
     // wait for FCU connection
     while (ros::ok() && !current_state.connected)
@@ -111,8 +104,7 @@ int main(int argc, char **argv)
             break;
 
         case takeoff:
-            if (takeoff_client.call(takeoff_cmd) &&
-                (ros::Time::now() - last_request > ros::Duration(3.0)))
+            if (takeoff_client.call(takeoff_cmd))
             {
                 ROS_INFO("Vehicle Takeoff!");
                 drone_state = land;
