@@ -136,29 +136,27 @@ int main(int argc, char **argv)
             break;
 
         case takeoff:
-            ROS_INFO("Vehicle Takeoff: %d", takeoff_client.call(takeoff_cmd));
-            drone_state = land;
-            last_request = ros::Time::now();
-            // if (takeoff_client.call(takeoff_cmd) &&
-            //     (ros::Time::now() - last_request > ros::Duration(1.0)))
-            // {
-            //     ROS_INFO("Vehicle Takeoff!");
-            //     drone_state = land;
-            // }
-            // else
-            // {
-            //     ROS_INFO("Vehicle Takeoff Failed!");
-            // }
-            // if (!current_state.armed)
-            // {
-            //     drone_state = arm;
-            // }
-            // last_request = ros::Time::now();
+            if (ros::Time::now() - last_request > ros::Duration(3.0))
+            {
+                if (takeoff_client.call(takeoff_cmd))
+                {
+                    ROS_INFO("Vehicle Takeoff!");
+                    drone_state = land;
+                    last_request = ros::Time::now();
+                }
+                else
+                {
+                    ROS_INFO("Vehicle Takeoff Failed!");
+                    drone_state = arm;
+                    last_request = ros::Time::now();
+                }
+                
+            }
 
             break;
 
         case land:
-            if (!current_state.armed &&
+            if (current_state.armed &&
                 (ros::Time::now() - last_request > ros::Duration(10.0)))
             {
                 mavros_msgs::CommandTOL land_cmd;
