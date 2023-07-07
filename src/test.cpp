@@ -14,6 +14,8 @@
 #include "signal.h" //necessary for the Custom SIGINT handler
 #include "stdio.h"  //necessary for the Custom SIGINT handler
 
+bool is_interrupted = false;
+
 // 定义一个安全的SIGINT处理函数
 void safeSigintHandler(int sig)
 {
@@ -28,7 +30,9 @@ void safeSigintHandler(int sig)
     {
         ROS_INFO("Vehicle landed!");
     }
-    ros::shutdown();
+    // ros::shutdown();
+    // 设置中断标志
+    is_interrupted = true;
 }
 
 mavros_msgs::State current_state;
@@ -87,7 +91,7 @@ int main(int argc, char **argv)
 
     ros::Time last_request = ros::Time::now();
 
-    while (ros::ok())
+    while (ros::ok() && !is_interrupted)
     {
         switch (drone_state)
         {
@@ -173,6 +177,8 @@ int main(int argc, char **argv)
 
         ros::spinOnce();
         rate.sleep();
+        // 在循环结束后调用ros::shutdown()
+        ros::shutdown();
     }
 
     return 0;
