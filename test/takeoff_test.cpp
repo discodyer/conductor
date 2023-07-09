@@ -1,6 +1,6 @@
 /**
- * @file offb_node.cpp
- * @brief Offboard control example node, written with MAVROS version 0.19.x, PX4 Pro Flight
+ * @file takeoff_test.cpp
+ * @brief Ardupilot 起飞降落测试
  * Stack and tested in Gazebo Classic SITL
  */
 

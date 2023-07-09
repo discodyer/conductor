@@ -1,6 +1,6 @@
 /**
- * @file test.cpp
- * @brief 测试文件，各种测试，不用管
+ * @file takeoff_example.cpp
+ * @brief Ardupilot 起飞降落测试，使用Conductor封装库
  * Stack and tested in Gazebo Classic SITL
  */
 

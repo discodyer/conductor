@@ -1,5 +1,11 @@
 #include "conductor/base.hpp"
 
+/// @brief 
+/// @param argc 
+/// @param argv 
+/// @param name 节点名称
+/// @param rate_num loop循环频率
+/// @param options 节点实例化选项
 BaseConductor::BaseConductor(int &argc, char **argv, const std::string &name, double rate_num, uint32_t options): rate(rate_num)
 {
     ros::init(argc, argv, name, options);
@@ -7,12 +13,16 @@ BaseConductor::BaseConductor(int &argc, char **argv, const std::string &name, do
     this->init_node();
 }
 
+/// @brief 
+/// @param nodehandle 直接传入外部 nodehandle
+/// @param rate_num loop循环频率
 BaseConductor::BaseConductor(ros::NodeHandle *nodehandle, double rate_num) : rate(rate_num), _nh(*nodehandle)
 {
     mission_state = prearm;
     this->init_node();
 }
 
+/// @brief 初始化各种订阅和发布服务
 void BaseConductor::init_node()
 {
     _state_sub = _nh.subscribe<mavros_msgs::State>("mavros/state", 10, &BaseConductor::sub_state_cb, this);
@@ -26,12 +36,16 @@ void BaseConductor::init_node()
     _set_raw_pub = _nh.advertise<mavros_msgs::PositionTarget>("mavros/setpoint_raw/local", 10);
 }
 
+/// @brief mavros/state 订阅回调函数
+/// @param msg 
 void BaseConductor::sub_state_cb(const mavros_msgs::State::ConstPtr &msg)
 {
     this->current_state = *msg;
 }
 
-
+/// @brief 设置飞行模式为 guided
+/// @param delay 距离上一个操作的延迟
+/// @return bool
 bool BaseConductor::set_mode_guided(double delay)
 {
     mavros_msgs::SetMode mode_guided_msg;
@@ -59,6 +73,9 @@ bool BaseConductor::set_mode_guided(double delay)
     return false;
 }
 
+/// @brief 解锁电机
+/// @param delay 距离上一个操作的延迟
+/// @return bool
 bool BaseConductor::arm(double delay)
 {
     if (!current_state.armed &&
@@ -87,7 +104,11 @@ bool BaseConductor::arm(double delay)
     return false;
 }
 
-bool BaseConductor::takeoff(double altitude)
+/// @brief 起飞到指定高度 ArduCopter
+/// @param altitude 高度 单位 M
+/// @param delay 距离上一个操作的延迟
+/// @return bool
+bool BaseConductor::takeoff(double altitude, double delay)
 {
     if (ros::Time::now() - this->last_request > ros::Duration(3.0))
     {
@@ -111,6 +132,9 @@ bool BaseConductor::takeoff(double altitude)
     return false;
 }
 
+/// @brief 切换到landed模式（ArduCopter）降落飞机
+/// @param delay 距离上一个操作的延迟
+/// @return bool
 bool BaseConductor::land(double delay)
 {
     if (this->current_state.armed &&

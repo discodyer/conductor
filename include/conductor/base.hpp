@@ -45,7 +45,7 @@ public:
 
     bool set_mode_guided(double delay = 5.0);
     bool arm(double delay = 5.0);
-    bool takeoff(double altitude);
+    bool takeoff(double altitude, double delay = 3.0);
     bool land(double delay = 10.0);
 
     ~BaseConductor(){};

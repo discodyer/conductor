@@ -145,13 +145,13 @@ add_library(BaseConductor
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/conductor_node.cpp)
 
-add_executable(takeoff_test test/takeoff_test.cpp)
-add_dependencies(takeoff_test ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(takeoff_test ${catkin_LIBRARIES})
+# add_executable(takeoff_test test/takeoff_test.cpp)
+# add_dependencies(takeoff_test ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# target_link_libraries(takeoff_test ${catkin_LIBRARIES})
 
-add_executable(pose_test test/test.cpp)
-add_dependencies(pose_test ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(pose_test BaseConductor ${catkin_LIBRARIES})
+add_executable(takeoff example/takeoff_example.cpp)
+add_dependencies(takeoff ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(takeoff BaseConductor ${catkin_LIBRARIES})
 # add_dependencies(test beginner_tutorials_generate_messages_cpp)
 
 ## Rename C++ executable without prefix
@@ -188,11 +188,11 @@ target_link_libraries(pose_test BaseConductor ${catkin_LIBRARIES})
 # install(TARGETS ${PROJECT_NAME}_node
 #   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 # )
-install(TARGETS takeoff_test
-   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
- )
+# install(TARGETS takeoff_test
+#    RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+#  )
 
-install(TARGETS pose_test
+install(TARGETS takeoff
  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
