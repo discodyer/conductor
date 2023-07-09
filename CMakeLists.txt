@@ -131,9 +131,9 @@ include_directories(
 )
 
 ## Declare a C++ library
-# add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/conductor.cpp
-# )
+add_library(BaseConductor
+  src/lib/base.cpp
+)
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
@@ -145,10 +145,13 @@ include_directories(
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/conductor_node.cpp)
 
-add_executable(takeoff_test src/takeoff_test.cpp)
+add_executable(takeoff_test test/takeoff_test.cpp)
 add_dependencies(takeoff_test ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-
 target_link_libraries(takeoff_test ${catkin_LIBRARIES})
+
+add_executable(pose_test test/test.cpp)
+add_dependencies(pose_test ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(pose_test BaseConductor ${catkin_LIBRARIES})
 # add_dependencies(test beginner_tutorials_generate_messages_cpp)
 
 ## Rename C++ executable without prefix
@@ -188,6 +191,10 @@ target_link_libraries(takeoff_test ${catkin_LIBRARIES})
 install(TARGETS takeoff_test
    RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
  )
+
+install(TARGETS pose_test
+ RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
 
 catkin_install_python(PROGRAMS src/beeper.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

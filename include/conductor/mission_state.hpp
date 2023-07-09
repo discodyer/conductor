@@ -5,11 +5,12 @@
 void safeSigintHandler(int sig);
 
 // 飞行任务状态
-enum mission_state
+enum MissionState
 {
     prearm,
     arm,
     takeoff,
+    pose,
     land
 };
 

@@ -58,7 +58,7 @@ int main(int argc, char **argv)
     // the setpoint publishing rate MUST be faster than 2Hz
     ros::Rate rate(50.0);
 
-    mission_state drone_state = prearm;
+    MissionState drone_state = prearm;
 
     // wait for FCU connection
     while (ros::ok() && !current_state.connected)
@@ -71,14 +71,6 @@ int main(int argc, char **argv)
     pose.pose.position.x = 0;
     pose.pose.position.y = 0;
     pose.pose.position.z = 1;
-
-    // send a few setpoints before starting
-    // for (int i = 100; ros::ok() && i > 0; --i)
-    // {
-    //     local_pos_pub.publish(pose);
-    //     ros::spinOnce();
-    //     rate.sleep();
-    // }
 
     mavros_msgs::SetMode set_mode_guided;
     set_mode_guided.request.custom_mode = "GUIDED";
