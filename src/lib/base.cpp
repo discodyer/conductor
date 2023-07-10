@@ -1,4 +1,5 @@
 #include "conductor/base.hpp"
+#include "conductor/ansi_color.hpp"
 
 /// @brief 
 /// @param argc 
@@ -55,17 +56,17 @@ bool BaseConductor::set_mode_guided(double delay)
         if (_set_mode_client.call(mode_guided_msg) &&
             mode_guided_msg.response.mode_sent)
         {
-            ROS_INFO("Guided enabled!");
+            ROS_INFO(SUCCESS("Guided enabled!"));
             this->mission_state = MissionState::arm;
-            ROS_INFO("Mission mode -> arm");
+            ROS_INFO(MISSION_SWITCH_TO("arm"));
             last_request = ros::Time::now();
             return true;
         }
         else
         {
-            ROS_INFO("Guided Switch Failed!");
+            ROS_ERROR("Guided Switch Failed!");
             this->mission_state = MissionState::prearm;
-            ROS_INFO("Mission mode -> prearm");
+            ROS_INFO(MISSION_SWITCH_TO("prearm"));
             last_request = ros::Time::now();
             return false;
         }
@@ -86,17 +87,17 @@ bool BaseConductor::arm(double delay)
         if (_arming_client.call(arm_cmd) &&
             arm_cmd.response.success)
         {
-            ROS_INFO("Vehicle armed!");
+            ROS_INFO(SUCCESS("Vehicle armed!"));
             this->mission_state = MissionState::takeoff;
-            ROS_INFO("Mission mode -> takeoff");
+            ROS_INFO(MISSION_SWITCH_TO("takeoff"));
             last_request = ros::Time::now();
             return true;
         }
         else
         {
-            ROS_INFO("Vehicle arm failed!");
+            ROS_ERROR("Vehicle arm failed!");
             this->mission_state = MissionState::prearm;
-            ROS_INFO("Mission mode -> prearm");
+            ROS_INFO(MISSION_SWITCH_TO("prearm"));
             last_request = ros::Time::now();
             return false;
         }
@@ -116,15 +117,15 @@ bool BaseConductor::takeoff(double altitude, double delay)
         takeoff_cmd.request.altitude = altitude;
         if (_takeoff_client.call(takeoff_cmd))
         {
-            ROS_INFO("Vehicle Takeoff to altitude: %0.2f", altitude);
+            ROS_INFO(SUCCESS("Vehicle Takeoff to altitude: %0.2f"), altitude);
             last_request = ros::Time::now();
             return true;
         }
         else
         {
-            ROS_INFO("Vehicle Takeoff Failed!");
+            ROS_ERROR("Vehicle Takeoff Failed!");
             this->mission_state = MissionState::arm;
-            ROS_INFO("Mission mode -> arm");
+            ROS_INFO(MISSION_SWITCH_TO("arm"));
             last_request = ros::Time::now();
             return false;
         }
@@ -144,13 +145,13 @@ bool BaseConductor::land(double delay)
         if (_land_client.call(land_cmd) &&
             land_cmd.response.success)
         {
-            ROS_INFO("Vehicle landed!");
+            ROS_INFO(SUCCESS("Vehicle landed!"));
             last_request = ros::Time::now();
             return true;
         }
         else
         {
-            ROS_INFO("Vehicle land failed!");
+            ROS_ERROR("Vehicle land failed!");
             last_request = ros::Time::now();
             return false;
         }

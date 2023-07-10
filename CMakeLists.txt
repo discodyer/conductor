@@ -152,6 +152,12 @@ add_library(BaseConductor
 add_executable(takeoff example/takeoff_example.cpp)
 add_dependencies(takeoff ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(takeoff BaseConductor ${catkin_LIBRARIES})
+
+# 绕圆飞行（有毛病）
+# add_executable(circle src/test_circle.cpp)
+# add_dependencies(circle ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# target_link_libraries(circle ${catkin_LIBRARIES})
+
 # add_dependencies(test beginner_tutorials_generate_messages_cpp)
 
 ## Rename C++ executable without prefix
@@ -195,6 +201,11 @@ target_link_libraries(takeoff BaseConductor ${catkin_LIBRARIES})
 install(TARGETS takeoff
  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
+
+# 绕圆飞行（有毛病）
+# install(TARGETS circle
+#  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+# )
 
 catkin_install_python(PROGRAMS src/beeper.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

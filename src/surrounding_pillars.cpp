@@ -1,7 +1,6 @@
 /**
- * @file takeoff_example.cpp
- * @brief Ardupilot 起飞降落测试，使用Conductor封装库
- * Stack and tested in Gazebo Classic SITL
+ * @file surrounding_pillars.cpp
+ * @brief 绕杆飞行测试，使用Conductor封装库
  */
 
 #include <ros/ros.h>
@@ -16,17 +15,10 @@
 
 #include "conductor/mission_state.hpp"
 #include "conductor/ansi_color.hpp"
+#include "conductor/apm.hpp"
 
 #include "signal.h" //necessary for the Custom SIGINT handler
 #include "stdio.h"  //necessary for the Custom SIGINT handler
-
-#define DRONE_TYPE APM // 设置宏的值为 APM 或 PX4
-
-#if DRONE_TYPE == APM
-#include "conductor/apm.hpp"
-#elif DRONE_TYPE == PX4
-#include "conductor/px4.hpp"
-#endif
 
 bool is_interrupted = false;
 
@@ -53,6 +45,7 @@ int main(int argc, char **argv)
 {
     ros::init(argc, argv, "guided_node", ros::init_options::NoSigintHandler);
     ros::NodeHandle nh;
+    
     signal(SIGINT, safeSigintHandler);
 
     ArduConductor apm(&nh);

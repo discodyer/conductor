@@ -15,7 +15,7 @@
 
 class BaseConductor
 {
-private:
+protected:
     void init_node();
     ros::NodeHandle _nh;
 
