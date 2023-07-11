@@ -16,7 +16,7 @@
 class BaseConductor
 {
 protected:
-    void init_node();
+    virtual void init_node();
     ros::NodeHandle _nh;                    // ROS 节点句柄
 
     ros::Subscriber _state_sub;             // 订阅器 - 状态

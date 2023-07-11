@@ -45,18 +45,20 @@ int main(int argc, char **argv)
 {
     ros::init(argc, argv, "guided_node", ros::init_options::NoSigintHandler);
     ros::NodeHandle nh;
-    
+
     signal(SIGINT, safeSigintHandler);
 
     ArduConductor apm(&nh);
 
 
     // wait for FCU connection
-    while (ros::ok() && !apm.current_state.connected)
+    while (ros::ok() && !apm.current_state.connected && !is_interrupted)
     {
         ros::spinOnce();
         apm.rate.sleep();
     }
+
+    ROS_INFO(SUCCESS("Drone connected!"));
 
     // 重置上一次操作的时间为当前时刻
     apm.last_request = ros::Time::now();
@@ -67,7 +69,10 @@ int main(int argc, char **argv)
         switch (apm.mission_state)
         {
         case prearm:
-            apm.set_mode_guided(5.0); // 修改飞行模式为 Guided (ArduCopter)
+            if(apm.set_mode_guided(5.0))    // 修改飞行模式为 Guided (ArduCopter)
+            {
+                apm.send_gp_origin();       // 如果切换成Guided模式就发送全局原点坐标
+            }
             break;
 
         case arm:
@@ -75,12 +80,25 @@ int main(int argc, char **argv)
             break;
 
         case takeoff:
-            if (apm.takeoff(1.0)) // 起飞到1M高度
+            if (apm.takeoff(1.0))           // 起飞到1M高度
             {
-                apm.mission_state = land;
-                ROS_INFO(MISSION_SWITCH_TO("land"));
+                apm.mission_state = pose;
+                ROS_INFO(MISSION_SWITCH_TO("pose"));
             }
 
+            break;
+
+        case pose:
+            if(apm.is_time_elapsed(5.0))
+            {
+                // apm.set_move_speed(0.4);
+                apm.set_speed_body(100, 0, 0, 0);
+            }
+            if(apm.is_time_elapsed(10.0))
+            {
+                apm.last_request = ros::Time::now();
+                apm.mission_state = land;
+            }
             break;
 
         case land:

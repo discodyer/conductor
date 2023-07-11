@@ -28,11 +28,10 @@ void BaseConductor::init_node()
 {
     setlocale(LC_ALL, "");
     ROS_INFO(COLORED_TEXT("Initializing node...", "\033[1m" ANSI_COLOR_MAGENTA));
+    ROS_INFO(COLORED_TEXT("高性能ですから!", "\033[2m" ANSI_COLOR_WHITE));
     _state_sub = _nh.subscribe<mavros_msgs::State>("mavros/state", 10, &BaseConductor::sub_state_cb, this);
     _local_pos_pub = _nh.advertise<geometry_msgs::PoseStamped>("mavros/setpoint_position/local", 10);
-
     _set_raw_pub = _nh.advertise<mavros_msgs::PositionTarget>("mavros/setpoint_raw/local", 10);
-    ROS_INFO(COLORED_TEXT("高性能ですから!", "\033[2m" ANSI_COLOR_WHITE));
 }
 
 /// @brief mavros/state 订阅回调函数
