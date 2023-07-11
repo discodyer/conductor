@@ -5,7 +5,7 @@
 /// @param argc
 /// @param argv
 /// @param name 节点名称
-/// @param rate_num loop循环频率
+/// @param rate_num 循环频率
 /// @param options 节点实例化选项
 BaseConductor::BaseConductor(int &argc, char **argv, const std::string &name, double rate_num, uint32_t options) : rate(rate_num)
 {
@@ -15,7 +15,7 @@ BaseConductor::BaseConductor(int &argc, char **argv, const std::string &name, do
 }
 
 /// @brief
-/// @param nodehandle 直接传入外部 nodehandle
+/// @param nodehandle 外部 NodeHandle
 /// @param rate_num loop循环频率
 BaseConductor::BaseConductor(ros::NodeHandle *nodehandle, double rate_num) : rate(rate_num), _nh(*nodehandle)
 {

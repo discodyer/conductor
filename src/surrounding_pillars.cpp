@@ -89,12 +89,13 @@ int main(int argc, char **argv)
             break;
 
         case pose:
-            if(apm.is_time_elapsed(5.0))
+            if(apm.is_time_elapsed(2.0))
             {
                 // apm.set_move_speed(0.4);
-                apm.set_speed_body(100, 0, 0, 0);
+                // apm.set_speed_body(1, 0, 0, 0);
+                // apm.set_pose_body(1, 0, 1, 0);
             }
-            if(apm.is_time_elapsed(10.0))
+            if(apm.is_time_elapsed(20.0))
             {
                 apm.last_request = ros::Time::now();
                 apm.mission_state = land;
