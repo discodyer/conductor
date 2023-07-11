@@ -17,19 +17,12 @@ class BaseConductor
 {
 protected:
     void init_node();
-    ros::NodeHandle _nh;
+    ros::NodeHandle _nh;                    // ROS 节点句柄
 
-    ros::Subscriber _state_sub;
+    ros::Subscriber _state_sub;             // 订阅器 - 状态
 
-    ros::Publisher _local_pos_pub;
-    ros::Publisher _pos_pub;
-    ros::Publisher _vel_pub;
-    ros::Publisher _set_raw_pub;
-
-    ros::ServiceClient _arming_client;
-    ros::ServiceClient _set_mode_client;
-    ros::ServiceClient _takeoff_client;
-    ros::ServiceClient _land_client;
+    ros::Publisher _local_pos_pub;          // 发布器 - 设置本地位置目标
+    ros::Publisher _set_raw_pub;            // 发布器 - 设置原始位置目标
 
     void sub_state_cb(const mavros_msgs::State::ConstPtr &msg);
 
@@ -47,6 +40,8 @@ public:
     bool arm(double delay = 5.0);
     bool takeoff(double altitude, double delay = 3.0);
     bool land(double delay = 10.0);
+
+    bool is_time_elapsed(double delay);
 
     ~BaseConductor(){};
 };
