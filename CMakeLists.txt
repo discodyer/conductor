@@ -4,6 +4,9 @@ project(conductor)
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
 
+## UTF-8 编码
+add_compile_options(-fexec-charset=UTF-8)
+
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
@@ -133,6 +136,7 @@ include_directories(
 ## Declare a C++ library
 add_library(BaseConductor
   src/lib/base.cpp
+  src/lib/apm.cpp
 )
 
 ## Add cmake target dependencies of the library
