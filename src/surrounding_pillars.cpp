@@ -20,6 +20,8 @@
 #include "signal.h" //necessary for the Custom SIGINT handler
 #include "stdio.h"  //necessary for the Custom SIGINT handler
 
+#define PI 3.1415926535
+
 bool is_interrupted = false;
 
 // 定义一个安全的SIGINT处理函数
@@ -50,7 +52,6 @@ int main(int argc, char **argv)
 
     ArduConductor apm(&nh);
 
-
     // wait for FCU connection
     while (ros::ok() && !apm.current_state.connected && !is_interrupted)
     {
@@ -62,16 +63,17 @@ int main(int argc, char **argv)
 
     // 重置上一次操作的时间为当前时刻
     apm.last_request = ros::Time::now();
-
+    int count = 0;
     while (ros::ok() && !is_interrupted)
     {
         // 任务执行状态机
         switch (apm.mission_state)
         {
         case prearm:
-            if(apm.set_mode_guided(5.0))    // 修改飞行模式为 Guided (ArduCopter)
+            if (apm.set_mode_guided(5.0)) // 修改飞行模式为 Guided (ArduCopter)
             {
-                apm.send_gp_origin();       // 如果切换成Guided模式就发送全局原点坐标
+                apm.send_gp_origin();    // 如果切换成Guided模式就发送全局原点坐标
+                apm.set_move_speed(0.2); // 设置空速
             }
             break;
 
@@ -80,7 +82,7 @@ int main(int argc, char **argv)
             break;
 
         case takeoff:
-            if (apm.takeoff(1.0))           // 起飞到1M高度
+            if (apm.takeoff(1.0)) // 起飞到1M高度
             {
                 apm.mission_state = pose;
                 ROS_INFO(MISSION_SWITCH_TO("pose"));
@@ -89,13 +91,43 @@ int main(int argc, char **argv)
             break;
 
         case pose:
-            if(apm.is_time_elapsed(2.0))
+            if (apm.is_time_elapsed(2.0) && count == 0)
             {
-                // apm.set_move_speed(0.4);
                 // apm.set_speed_body(1, 0, 0, 0);
-                // apm.set_pose_body(1, 0, 1, 0);
+                apm.set_pose_body(0.5, 0, 0, 0);
+                count++;
             }
-            if(apm.is_time_elapsed(20.0))
+            else if (apm.is_time_elapsed(7.0) && count == 1)
+            {
+                apm.set_pose_body(0.0, 0.5, 0, 0);
+                count++;
+            }
+            else if (apm.is_time_elapsed(12.0) && count == 2)
+            {
+                apm.set_pose_body(1.0, 0, 0, 0);
+                count++;
+            }
+            else if (apm.is_time_elapsed(17.0) && count == 3)
+            {
+                apm.set_pose_body(0, -1.0, 0, 0);
+                count++;
+            }
+            else if (apm.is_time_elapsed(22.0) && count == 4)
+            {
+                apm.set_pose_body(-1.0, 0, 0, 0);
+                count++;
+            }
+            else if (apm.is_time_elapsed(27.0) && count == 5)
+            {
+                apm.set_pose_body(0, 0.5, 0, 0);
+                count++;
+            }
+            else if (apm.is_time_elapsed(32.0) && count == 6)
+            {
+                apm.set_pose_body(-0.5, 0, 0, 0);
+                count++;
+            }
+            else if (apm.is_time_elapsed(37.0))
             {
                 apm.last_request = ros::Time::now();
                 apm.mission_state = land;
