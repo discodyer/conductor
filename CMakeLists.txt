@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.0.2)
 project(conductor)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
-# add_compile_options(-std=c++11)
+add_compile_options(-std=c++11)
 
 ## UTF-8 编码
 add_compile_options(-fexec-charset=UTF-8)
@@ -137,6 +137,7 @@ include_directories(
 add_library(Conductor
   src/lib/base.cpp
   src/lib/apm.cpp
+  src/lib/pid.cpp
 )
 
 ## Add cmake target dependencies of the library

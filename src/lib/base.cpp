@@ -7,7 +7,8 @@
 /// @param name 节点名称
 /// @param rate_num 循环频率
 /// @param options 节点实例化选项
-BaseConductor::BaseConductor(int &argc, char **argv, const std::string &name, double rate_num, uint32_t options) : rate(rate_num)
+BaseConductor::BaseConductor(int &argc, char **argv, const std::string &name, double rate_num, uint32_t options)
+    : rate(rate_num)
 {
     ros::init(argc, argv, name, options);
     mission_state = prearm;
@@ -17,7 +18,9 @@ BaseConductor::BaseConductor(int &argc, char **argv, const std::string &name, do
 /// @brief
 /// @param nodehandle 外部 NodeHandle
 /// @param rate_num loop循环频率
-BaseConductor::BaseConductor(ros::NodeHandle *nodehandle, double rate_num) : rate(rate_num), _nh(*nodehandle)
+BaseConductor::BaseConductor(ros::NodeHandle *nodehandle, double rate_num)
+    : rate(rate_num),
+      _nh(*nodehandle)
 {
     mission_state = prearm;
     this->init_node();
@@ -58,7 +61,7 @@ bool BaseConductor::set_mode_guided(double delay)
             ROS_INFO(SUCCESS("Guided enabled!"));
             this->mission_state = MissionState::arm;
             ROS_INFO(MISSION_SWITCH_TO("arm"));
-            last_request = ros::Time::now();
+            update_last_request_time();
             return true;
         }
         else
@@ -66,7 +69,7 @@ bool BaseConductor::set_mode_guided(double delay)
             ROS_ERROR("Guided Switch Failed!");
             this->mission_state = MissionState::prearm;
             ROS_INFO(MISSION_SWITCH_TO("prearm"));
-            last_request = ros::Time::now();
+            update_last_request_time();
             return false;
         }
     }
@@ -92,7 +95,7 @@ bool BaseConductor::arm(double delay)
             ROS_INFO(SUCCESS("Vehicle armed!"));
             this->mission_state = MissionState::takeoff;
             ROS_INFO(MISSION_SWITCH_TO("takeoff"));
-            last_request = ros::Time::now();
+            update_last_request_time();
             return true;
         }
         else
@@ -100,7 +103,7 @@ bool BaseConductor::arm(double delay)
             ROS_ERROR("Vehicle arm failed!");
             this->mission_state = MissionState::prearm;
             ROS_INFO(MISSION_SWITCH_TO("prearm"));
-            last_request = ros::Time::now();
+            update_last_request_time();
             return false;
         }
     }
@@ -123,7 +126,7 @@ bool BaseConductor::takeoff(double altitude, double delay)
         if (_takeoff_client.call(takeoff_cmd))
         {
             ROS_INFO(SUCCESS("Vehicle Takeoff to altitude: %0.2f"), altitude);
-            last_request = ros::Time::now();
+            update_last_request_time();
             return true;
         }
         else
@@ -131,7 +134,7 @@ bool BaseConductor::takeoff(double altitude, double delay)
             ROS_ERROR("Vehicle Takeoff Failed!");
             this->mission_state = MissionState::arm;
             ROS_INFO(MISSION_SWITCH_TO("arm"));
-            last_request = ros::Time::now();
+            update_last_request_time();
             return false;
         }
     }
@@ -154,13 +157,13 @@ bool BaseConductor::land(double delay)
             land_cmd.response.success)
         {
             ROS_INFO(SUCCESS("Vehicle landed!"));
-            last_request = ros::Time::now();
+            update_last_request_time();
             return true;
         }
         else
         {
             ROS_ERROR("Vehicle land failed!");
-            last_request = ros::Time::now();
+            update_last_request_time();
             return false;
         }
     }
@@ -172,12 +175,11 @@ bool BaseConductor::land(double delay)
 /// @return bool
 bool BaseConductor::is_time_elapsed(double delay)
 {
-    if (ros::Time::now() - this->last_request > ros::Duration(delay))
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+    return ros::Time::now() - this->last_request > ros::Duration(delay);
+}
+
+/// @brief 更新 last_request 的值为当前的 ROS 时间
+void BaseConductor::update_last_request_time()
+{
+    last_request = ros::Time::now();
 }

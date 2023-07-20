@@ -6,12 +6,14 @@
 #include "conductor/ansi_color.hpp"
 #include "conductor/apm.hpp"
 
-ArduConductor::ArduConductor(int &argc, char **argv, const std::string &name, double rate, uint32_t options) : BaseConductor(argc, argv, name, rate, options)
+ArduConductor::ArduConductor(int &argc, char **argv, const std::string &name, double rate, uint32_t options)
+	: BaseConductor(argc, argv, name, rate, options)
 {
 	init_node();
 }
 
-ArduConductor::ArduConductor(ros::NodeHandle *nodehandle, double rate) : BaseConductor(nodehandle, rate)
+ArduConductor::ArduConductor(ros::NodeHandle *nodehandle, double rate)
+	: BaseConductor(nodehandle, rate)
 {
 	init_node();
 }
@@ -66,7 +68,12 @@ void ArduConductor::set_speed_body(double x, double y, double z, double yaw_rate
 	using namespace mavros_msgs;
 	mavros_msgs::PositionTarget raw_target;
 	raw_target.coordinate_frame = PositionTarget::FRAME_BODY_OFFSET_NED;
-	raw_target.type_mask = PositionTarget::IGNORE_PX | PositionTarget::IGNORE_PY | PositionTarget::IGNORE_PZ | PositionTarget::IGNORE_AFX | PositionTarget::IGNORE_AFY | PositionTarget::IGNORE_AFZ;
+	raw_target.type_mask = PositionTarget::IGNORE_PX |
+						   PositionTarget::IGNORE_PY |
+						   PositionTarget::IGNORE_PZ |
+						   PositionTarget::IGNORE_AFX |
+						   PositionTarget::IGNORE_AFY |
+						   PositionTarget::IGNORE_AFZ;
 	if (fabs(yaw_rate) < 1e-3)
 	{
 		raw_target.type_mask |= PositionTarget::IGNORE_YAW_RATE;
@@ -92,7 +99,13 @@ void ArduConductor::set_angular_rate(double yaw_rate)
 	using namespace mavros_msgs;
 	mavros_msgs::PositionTarget raw_target;
 	raw_target.coordinate_frame = PositionTarget::FRAME_BODY_OFFSET_NED;
-	raw_target.type_mask = PositionTarget::IGNORE_VX | PositionTarget::IGNORE_VY | PositionTarget::IGNORE_VZ | PositionTarget::IGNORE_AFX | PositionTarget::IGNORE_AFY | PositionTarget::IGNORE_AFZ | PositionTarget::IGNORE_YAW; // yaw_rate must be used with pose or vel.
+	raw_target.type_mask = PositionTarget::IGNORE_VX |
+						   PositionTarget::IGNORE_VY |
+						   PositionTarget::IGNORE_VZ |
+						   PositionTarget::IGNORE_AFX |
+						   PositionTarget::IGNORE_AFY |
+						   PositionTarget::IGNORE_AFZ |
+						   PositionTarget::IGNORE_YAW; // yaw_rate must be used with pose or vel.
 	raw_target.position.x = 0;
 	raw_target.position.y = 0;
 	raw_target.position.z = 0;
@@ -111,7 +124,13 @@ void ArduConductor::set_pose_body(double x, double y, double z, double yaw)
 	using namespace mavros_msgs;
 	mavros_msgs::PositionTarget raw_target;
 	raw_target.coordinate_frame = PositionTarget::FRAME_BODY_OFFSET_NED;
-	raw_target.type_mask = PositionTarget::IGNORE_VX | PositionTarget::IGNORE_VY | PositionTarget::IGNORE_VZ | PositionTarget::IGNORE_AFX | PositionTarget::IGNORE_AFY | PositionTarget::IGNORE_AFZ | PositionTarget::IGNORE_YAW_RATE;
+	raw_target.type_mask = PositionTarget::IGNORE_VX |
+						   PositionTarget::IGNORE_VY |
+						   PositionTarget::IGNORE_VZ |
+						   PositionTarget::IGNORE_AFX |
+						   PositionTarget::IGNORE_AFY |
+						   PositionTarget::IGNORE_AFZ |
+						   PositionTarget::IGNORE_YAW_RATE;
 	raw_target.position.x = x;
 	raw_target.position.y = y;
 	raw_target.position.z = z;
@@ -125,7 +144,13 @@ void ArduConductor::set_break()
 	using namespace mavros_msgs;
 	mavros_msgs::PositionTarget raw_target;
 	raw_target.coordinate_frame = PositionTarget::FRAME_BODY_OFFSET_NED;
-	raw_target.type_mask = PositionTarget::IGNORE_VX | PositionTarget::IGNORE_VY | PositionTarget::IGNORE_VZ | PositionTarget::IGNORE_AFX | PositionTarget::IGNORE_AFY | PositionTarget::IGNORE_AFZ | PositionTarget::IGNORE_YAW_RATE;
+	raw_target.type_mask = PositionTarget::IGNORE_VX |
+						   PositionTarget::IGNORE_VY |
+						   PositionTarget::IGNORE_VZ |
+						   PositionTarget::IGNORE_AFX |
+						   PositionTarget::IGNORE_AFY |
+						   PositionTarget::IGNORE_AFZ |
+						   PositionTarget::IGNORE_YAW_RATE;
 	raw_target.position.x = 0;
 	raw_target.position.y = 0;
 	raw_target.position.z = 0;

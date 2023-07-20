@@ -42,6 +42,7 @@ public:
     bool land(double delay = 10.0);
 
     bool is_time_elapsed(double delay);
+    void update_last_request_time();
 
     ~BaseConductor(){};
 };
