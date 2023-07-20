@@ -12,6 +12,7 @@
 #include <mavros_msgs/CommandTOL.h>
 #include <mavros_msgs/PositionTarget.h>
 #include <std_msgs/Float64.h>
+#include <geometry_msgs/Point.h>
 
 #include "conductor/mission_state.hpp"
 #include "conductor/ansi_color.hpp"
@@ -82,7 +83,7 @@ int main(int argc, char **argv)
             break;
 
         case takeoff:
-            if (apm.takeoff(1.0)) // 起飞到1M高度
+            if (apm.takeoff(0.5)) // 起飞到1M高度
             {
                 apm.mission_state = pose;
                 ROS_INFO(MISSION_SWITCH_TO("pose"));
@@ -93,41 +94,19 @@ int main(int argc, char **argv)
         case pose:
             if (apm.is_time_elapsed(2.0) && count == 0)
             {
+                apm.set_pose_body(0, 0, 0.6, 0);
+                ROS_INFO("takeoff to 1.0");
+                count ++;
+            }
+            else if (apm.is_time_elapsed(4.0) && count == 1)
+            {
                 // apm.set_speed_body(1, 0, 0, 0);
-                apm.set_pose_body(0.5, 0, 0, 0);
+                apm.set_move_speed(0.3); // 设置空速
+                apm.set_pose_body(2.70, 0.5, 0, 0);
+                ROS_INFO("to 2.7, 0.5");
                 count++;
             }
-            else if (apm.is_time_elapsed(7.0) && count == 1)
-            {
-                apm.set_pose_body(0.0, 0.5, 0, 0);
-                count++;
-            }
-            else if (apm.is_time_elapsed(12.0) && count == 2)
-            {
-                apm.set_pose_body(1.0, 0, 0, 0);
-                count++;
-            }
-            else if (apm.is_time_elapsed(17.0) && count == 3)
-            {
-                apm.set_pose_body(0, -1.0, 0, 0);
-                count++;
-            }
-            else if (apm.is_time_elapsed(22.0) && count == 4)
-            {
-                apm.set_pose_body(-1.0, 0, 0, 0);
-                count++;
-            }
-            else if (apm.is_time_elapsed(27.0) && count == 5)
-            {
-                apm.set_pose_body(0, 0.5, 0, 0);
-                count++;
-            }
-            else if (apm.is_time_elapsed(32.0) && count == 6)
-            {
-                apm.set_pose_body(-0.5, 0, 0, 0);
-                count++;
-            }
-            else if (apm.is_time_elapsed(37.0))
+            else if (apm.is_time_elapsed(20.0))
             {
                 apm.last_request = ros::Time::now();
                 apm.mission_state = land;
@@ -135,7 +114,7 @@ int main(int argc, char **argv)
             break;
 
         case land:
-            if (apm.land(10.0)) // 10s后降落
+            if (apm.land(2.0)) // 10s后降落
             {
                 ros::shutdown();
             }
