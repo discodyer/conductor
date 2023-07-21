@@ -14,9 +14,9 @@
 #include <mavros_msgs/PositionTarget.h>
 #include <std_msgs/Float64.h>
 
-#include "conductor/mission_state.hpp"
-// #include "conductor/apm.hpp"
-#include "conductor/base.hpp"
+#include "conductor/mission_state.h"
+// #include "conductor/apm.h"
+#include "conductor/base.h"
 
 #include "signal.h" //necessary for the Custom SIGINT handler
 #include "stdio.h"  //necessary for the Custom SIGINT handler

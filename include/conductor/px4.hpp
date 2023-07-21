@@ -1,6 +1,6 @@
-#ifndef PX4_HPP
-#define PX4_HPP
-#include "conductor/base.hpp"
+#ifndef PX4_H
+#define PX4_H
+#include "conductor/base.h"
 
 class PX4Conductor: public BaseConductor
 {
@@ -11,4 +11,4 @@ public:
     ~PX4Conductor(){};
 };
 
-#endif // PX4_HPP
+#endif // PX4_H

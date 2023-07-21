@@ -1,5 +1,5 @@
-#include "conductor/base.hpp"
-#include "conductor/ansi_color.hpp"
+#include "conductor/base.h"
+#include "conductor/ansi_color.h"
 
 /// @brief
 /// @param argc

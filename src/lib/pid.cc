@@ -1,4 +1,4 @@
-#include "conductor/pid_controller.hpp"
+#include "conductor/pid_controller.h"
 
 PIDController::PIDController(double kp, double ki, double kd, double outputMin, double outputMax)
     : m_kp(kp), m_ki(ki), m_kd(kd), m_outputMin(outputMin), m_outputMax(outputMax),

@@ -1,6 +1,6 @@
-#ifndef APM_HPP
-#define APM_HPP
-#include "conductor/base.hpp"
+#ifndef APM_H
+#define APM_H
+#include "conductor/base.h"
 
 class ArduConductor : public BaseConductor
 {
@@ -22,4 +22,4 @@ public:
     ~ArduConductor(){};
 };
 
-#endif // APM_HPP
+#endif // APM_H

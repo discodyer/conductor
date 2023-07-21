@@ -1,5 +1,5 @@
-#ifndef BASE_HPP
-#define BASE_HPP
+#ifndef BASE_H
+#define BASE_H
 
 #include <ros/ros.h>
 #include <geometry_msgs/PoseStamped.h>
@@ -11,7 +11,7 @@
 #include <mavros_msgs/PositionTarget.h>
 #include <std_msgs/Float64.h>
 
-#include "conductor/mission_state.hpp"
+#include "conductor/mission_state.h"
 
 class BaseConductor
 {
@@ -47,4 +47,4 @@ public:
     ~BaseConductor(){};
 };
 
-#endif // BASE_HPP
+#endif // BASE_H

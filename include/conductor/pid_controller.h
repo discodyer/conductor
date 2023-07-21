@@ -1,5 +1,7 @@
-#ifndef PID_CONTROLLER_HPP
-#define PID_CONTROLLER_HPP
+#ifndef PID_CONTROLLER_H
+#define PID_CONTROLLER_H
+
+#include <ros/ros.h>
 
 class PIDController {
 public:
@@ -16,6 +18,10 @@ private:
     double m_lastError;
     double m_integral;
     double m_derivative;
+
+    double m_sample_time;
+    ros::Time m_last_time;
+    ros::Time m_current_time;
 };
 
-#endif // PID_CONTROLLER_HPP
+#endif // PID_CONTROLLER_H

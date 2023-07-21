@@ -135,9 +135,9 @@ include_directories(
 
 ## Declare a C++ library
 add_library(Conductor
-  src/lib/base.cpp
-  src/lib/apm.cpp
-  src/lib/pid.cpp
+  src/lib/base.cc
+  src/lib/apm.cc
+  src/lib/pid.cc
 )
 
 ## Add cmake target dependencies of the library
@@ -154,12 +154,12 @@ add_library(Conductor
 # add_dependencies(takeoff_test ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 # target_link_libraries(takeoff_test ${catkin_LIBRARIES})
 
-add_executable(takeoff example/takeoff_example.cpp)
+add_executable(takeoff example/takeoff_example.cc)
 add_dependencies(takeoff ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(takeoff Conductor ${catkin_LIBRARIES})
 
 # 绕圆飞行（有毛病）
-add_executable(circle src/surrounding_pillars.cpp)
+add_executable(circle src/surrounding_pillars.cc)
 add_dependencies(circle ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(circle Conductor ${catkin_LIBRARIES})
 

@@ -1,7 +1,6 @@
 /**
- * @file takeoff_example.cpp
- * @brief Ardupilot 起飞降落测试，使用Conductor封装库
- * Stack and tested in Gazebo Classic SITL
+ * @file surrounding_pillars.cpp
+ * @brief 绕杆飞行测试，使用Conductor封装库
  */
 
 #include <ros/ros.h>
@@ -13,20 +12,16 @@
 #include <mavros_msgs/CommandTOL.h>
 #include <mavros_msgs/PositionTarget.h>
 #include <std_msgs/Float64.h>
+#include <geometry_msgs/Point.h>
 
-#include "conductor/mission_state.hpp"
-#include "conductor/ansi_color.hpp"
+#include "conductor/mission_state.h"
+#include "conductor/ansi_color.h"
+#include "conductor/apm.h"
 
 #include "signal.h" //necessary for the Custom SIGINT handler
 #include "stdio.h"  //necessary for the Custom SIGINT handler
 
-#define DRONE_TYPE APM // 设置宏的值为 APM 或 PX4
-
-#if DRONE_TYPE == APM
-#include "conductor/apm.hpp"
-#elif DRONE_TYPE == PX4
-#include "conductor/px4.hpp"
-#endif
+#define PI 3.1415926535
 
 bool is_interrupted = false;
 
@@ -53,28 +48,34 @@ int main(int argc, char **argv)
 {
     ros::init(argc, argv, "guided_node", ros::init_options::NoSigintHandler);
     ros::NodeHandle nh;
+
     signal(SIGINT, safeSigintHandler);
 
     ArduConductor apm(&nh);
 
-
     // wait for FCU connection
-    while (ros::ok() && !apm.current_state.connected)
+    while (ros::ok() && !apm.current_state.connected && !is_interrupted)
     {
         ros::spinOnce();
         apm.rate.sleep();
     }
 
+    ROS_INFO(SUCCESS("Drone connected!"));
+
     // 重置上一次操作的时间为当前时刻
     apm.last_request = ros::Time::now();
-
+    int count = 0;
     while (ros::ok() && !is_interrupted)
     {
         // 任务执行状态机
         switch (apm.mission_state)
         {
         case prearm:
-            apm.setModeGuided(5.0); // 修改飞行模式为 Guided (ArduCopter)
+            if (apm.setModeGuided(5.0)) // 修改飞行模式为 Guided (ArduCopter)
+            {
+                apm.sendGpOrigin();    // 如果切换成Guided模式就发送全局原点坐标
+                apm.setMoveSpeed(0.2); // 设置空速
+            }
             break;
 
         case arm:
@@ -82,16 +83,38 @@ int main(int argc, char **argv)
             break;
 
         case takeoff:
-            if (apm.takeoff(1.0)) // 起飞到1M高度
+            if (apm.takeoff(0.5)) // 起飞到1M高度
             {
-                apm.mission_state = land;
-                ROS_INFO(MISSION_SWITCH_TO("land"));
+                apm.mission_state = pose;
+                ROS_INFO(MISSION_SWITCH_TO("pose"));
             }
 
             break;
 
+        case pose:
+            if (apm.isTimeElapsed(2.0) && count == 0)
+            {
+                apm.setPoseBody(0, 0, 0.6, 0);
+                ROS_INFO("takeoff to 1.0");
+                count ++;
+            }
+            else if (apm.isTimeElapsed(4.0) && count == 1)
+            {
+                // apm.setSpeedBody(1, 0, 0, 0);
+                apm.setMoveSpeed(0.3); // 设置空速
+                apm.setPoseBody(2.70, 0.5, 0, 0);
+                ROS_INFO("to 2.7, 0.5");
+                count++;
+            }
+            else if (apm.isTimeElapsed(20.0))
+            {
+                apm.last_request = ros::Time::now();
+                apm.mission_state = land;
+            }
+            break;
+
         case land:
-            if (apm.land(10.0)) // 10s后降落
+            if (apm.land(2.0)) // 10s后降落
             {
                 ros::shutdown();
             }

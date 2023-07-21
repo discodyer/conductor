@@ -1,5 +1,5 @@
-#ifndef ANSI_COLOR_HPP
-#define ANSI_COLOR_HPP
+#ifndef ANSI_COLOR_H
+#define ANSI_COLOR_H
 
 // 文本颜色
 #define ANSI_COLOR_BLACK "\033[30m"
@@ -40,4 +40,4 @@
 
 #define SUCCESS(text) COLORED_TEXT(text, "\033[1m" ANSI_COLOR_GREEN)
 
-#endif // ANSI_COLOR_HPP
+#endif // ANSI_COLOR_H

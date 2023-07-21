@@ -10,7 +10,7 @@
 #include <mavros_msgs/SetMode.h>
 #include <mavros_msgs/State.h>
 #include <mavros_msgs/CommandTOL.h>
-#include <conductor/mission_state.hpp>
+#include <conductor/mission_state.h>
 #include "signal.h" //necessary for the Custom SIGINT handler
 #include "stdio.h"  //necessary for the Custom SIGINT handler
 

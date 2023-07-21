@@ -3,8 +3,8 @@
 #include <mavros_msgs/CommandCode.h>
 #include <mavros_msgs/PositionTarget.h>
 
-#include "conductor/ansi_color.hpp"
-#include "conductor/apm.hpp"
+#include "conductor/ansi_color.h"
+#include "conductor/apm.h"
 
 ArduConductor::ArduConductor(int &argc, char **argv, const std::string &name, double rate, uint32_t options)
 	: BaseConductor(argc, argv, name, rate, options)
