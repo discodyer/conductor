@@ -58,7 +58,7 @@ int main(int argc, char **argv)
     // the setpoint publishing rate MUST be faster than 2Hz
     ros::Rate rate(50.0);
 
-    MissionState drone_state = prearm;
+    MissionState drone_state = kPrearm;
 
     // wait for FCU connection
     while (ros::ok() && !current_state.connected)
@@ -87,7 +87,7 @@ int main(int argc, char **argv)
     {
         switch (drone_state)
         {
-        case prearm:
+        case kPrearm:
             if (current_state.mode != "GUIDED" &&
                 (ros::Time::now() - last_request > ros::Duration(5.0)))
             {
@@ -95,7 +95,7 @@ int main(int argc, char **argv)
                     setModeGuided.response.mode_sent)
                 {
                     ROS_INFO("Guided enabled");
-                    drone_state = arm;
+                    drone_state = kArm;
                 }
                 last_request = ros::Time::now();
             }
@@ -103,12 +103,12 @@ int main(int argc, char **argv)
                      (ros::Time::now() - last_request > ros::Duration(5.0)))
             {
                 ROS_INFO("Guided enabled");
-                drone_state = arm;
+                drone_state = kArm;
                 last_request = ros::Time::now();
             }
             break;
 
-        case arm:
+        case kArm:
             if (!current_state.armed &&
                 (ros::Time::now() - last_request > ros::Duration(5.0)))
             {
@@ -116,18 +116,18 @@ int main(int argc, char **argv)
                     arm_cmd.response.success)
                 {
                     ROS_INFO("Vehicle armed!");
-                    drone_state = takeoff;
+                    drone_state = kTakeoff;
                 }
                 else
                 {
                     ROS_INFO("Vehicle arm failed!");
-                    drone_state = prearm;
+                    drone_state = kPrearm;
                 }
                 last_request = ros::Time::now();
             }
             break;
 
-        case takeoff:
+        case kTakeoff:
             if (ros::Time::now() - last_request > ros::Duration(3.0))
             {
                 if (takeoff_client.call(takeoff_cmd))
@@ -139,7 +139,7 @@ int main(int argc, char **argv)
                 else
                 {
                     ROS_INFO("Vehicle Takeoff Failed!");
-                    drone_state = arm;
+                    drone_state = kArm;
                     last_request = ros::Time::now();
                 }
                 
@@ -147,7 +147,7 @@ int main(int argc, char **argv)
 
             break;
 
-        case land:
+        case kLand:
             if (current_state.armed &&
                 (ros::Time::now() - last_request > ros::Duration(10.0)))
             {
@@ -156,7 +156,7 @@ int main(int argc, char **argv)
                     land_cmd.response.success)
                 {
                     ROS_INFO("Vehicle landed!");
-                    drone_state = prearm;
+                    drone_state = kPrearm;
                     ros::shutdown();
                 }
                 last_request = ros::Time::now();

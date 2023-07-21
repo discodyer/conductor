@@ -73,24 +73,24 @@ int main(int argc, char **argv)
         // 任务执行状态机
         switch (apm.mission_state)
         {
-        case prearm:
+        case kPrearm:
             apm.setModeGuided(5.0); // 修改飞行模式为 Guided (ArduCopter)
             break;
 
-        case arm:
+        case kArm:
             apm.arm(5.0); // 解锁电机
             break;
 
-        case takeoff:
+        case kTakeoff:
             if (apm.takeoff(1.0)) // 起飞到1M高度
             {
-                apm.mission_state = land;
+                apm.mission_state = kLand;
                 ROS_INFO(MISSION_SWITCH_TO("land"));
             }
 
             break;
 
-        case land:
+        case kLand:
             if (apm.land(10.0)) // 10s后降落
             {
                 ros::shutdown();

@@ -11,7 +11,7 @@ BaseConductor::BaseConductor(int &argc, char **argv, const std::string &name, do
     : rate(rate_num)
 {
     ros::init(argc, argv, name, options);
-    mission_state = prearm;
+    mission_state = kPrearm;
     this->initNode();
 }
 
@@ -22,7 +22,7 @@ BaseConductor::BaseConductor(ros::NodeHandle *nodehandle, double rate_num)
     : rate(rate_num),
       nh_(*nodehandle)
 {
-    mission_state = prearm;
+    mission_state = kPrearm;
     this->initNode();
 }
 
@@ -59,7 +59,7 @@ bool BaseConductor::setModeGuided(double delay)
             mode_guided_msg.response.mode_sent)
         {
             ROS_INFO(SUCCESS("Guided enabled!"));
-            this->mission_state = MissionState::arm;
+            this->mission_state = MissionState::kArm;
             ROS_INFO(MISSION_SWITCH_TO("arm"));
             updateLastRequestTime();
             return true;
@@ -67,7 +67,7 @@ bool BaseConductor::setModeGuided(double delay)
         else
         {
             ROS_ERROR("Guided Switch Failed!");
-            this->mission_state = MissionState::prearm;
+            this->mission_state = MissionState::kPrearm;
             ROS_INFO(MISSION_SWITCH_TO("prearm"));
             updateLastRequestTime();
             return false;
@@ -93,7 +93,7 @@ bool BaseConductor::arm(double delay)
             arm_cmd.response.success)
         {
             ROS_INFO(SUCCESS("Vehicle armed!"));
-            this->mission_state = MissionState::takeoff;
+            this->mission_state = MissionState::kTakeoff;
             ROS_INFO(MISSION_SWITCH_TO("takeoff"));
             updateLastRequestTime();
             return true;
@@ -101,7 +101,7 @@ bool BaseConductor::arm(double delay)
         else
         {
             ROS_ERROR("Vehicle arm failed!");
-            this->mission_state = MissionState::prearm;
+            this->mission_state = MissionState::kPrearm;
             ROS_INFO(MISSION_SWITCH_TO("prearm"));
             updateLastRequestTime();
             return false;
@@ -132,7 +132,7 @@ bool BaseConductor::takeoff(double altitude, double delay)
         else
         {
             ROS_ERROR("Vehicle Takeoff Failed!");
-            this->mission_state = MissionState::arm;
+            this->mission_state = MissionState::kArm;
             ROS_INFO(MISSION_SWITCH_TO("arm"));
             updateLastRequestTime();
             return false;
