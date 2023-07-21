@@ -45,7 +45,7 @@ public:
     FixedPoint(const std::string &topic, fixed_point::Point center, ros::NodeHandle &nh, const PidParams &params_x, const PidParams &params_y);
 
     auto calcXYOutput(fixed_point::Point offset) -> fixed_point::Point;
-    auto calcOutput() -> fixed_point::Point;
+    auto calcXYOutput() -> fixed_point::Point;
     auto getBoundedOutput(fixed_point::Point offset) -> fixed_point::Point;
     auto getBoundedOutput() -> fixed_point::Point;
 

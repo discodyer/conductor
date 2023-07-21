@@ -1,4 +1,5 @@
 #include "conductor/fixed_point.h"
+#include "conductor/ansi_color.h"
 
 FixedPoint::FixedPoint(const std::string &topic, fixed_point::Point center, ros::NodeHandle &nh, const PidParams &params_x, const PidParams &params_y)
     : center_(center), nh_(nh), pid_controller_x(params_x.kp, params_x.ki, params_x.kd, params_x.windup_guard, params_x.output_bound, params_x.sample_time),
@@ -11,10 +12,14 @@ void FixedPoint::subPointCallback(const geometry_msgs::Point::ConstPtr &msg)
 {
     // Opencv 坐标系 往右X增大 往下Y增大
     // 飞机坐标系 X对应Opencv的-Y Y对应Opencv的-X
-
+    ROS_INFO(SUCCESS("\n--------------------------"));
     this->point_ = *msg;
-    auto offset = fixed_point::Point(center_.y - point_.y, center_.x - point_.x);
+    ROS_INFO(SUCCESS("\nGot point \nX: %0.2f\nY: %0.2f"), point_.x, point_.y);
+    auto offset = fixed_point::Point(point_.y - center_.y , point_.x - center_.x);
+    ROS_INFO(SUCCESS("\nOffset \nX: %0.2f\nY: %0.2f"), center_.y - point_.y, center_.x - point_.x);
     calcXYOutput(offset);
+    ROS_INFO(SUCCESS("\nOutput \nX: %0.2f\nY: %0.2f"), last_output_.x, last_output_.y);
+    ROS_INFO(SUCCESS("\n--------------------------"));
 }
 
 auto FixedPoint::calcXYOutput(fixed_point::Point offset) -> fixed_point::Point
@@ -24,7 +29,7 @@ auto FixedPoint::calcXYOutput(fixed_point::Point offset) -> fixed_point::Point
     return last_output_;
 }
 
-auto FixedPoint::calcOutput() -> fixed_point::Point
+auto FixedPoint::calcXYOutput() -> fixed_point::Point
 {
     return last_output_;
 }

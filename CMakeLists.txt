@@ -174,6 +174,10 @@ add_executable(fixed_point_ctrl src/fixed_point_ctrl.cc)
 add_dependencies(fixed_point_ctrl ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(fixed_point_ctrl conductor ${catkin_LIBRARIES})
 
+add_executable(fixed_point_ctrl_test src/fixed_point_ctrl_test.cc)
+add_dependencies(fixed_point_ctrl_test ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(fixed_point_ctrl_test conductor ${catkin_LIBRARIES})
+
 # add_dependencies(test beginner_tutorials_generate_messages_cpp)
 
 ## Rename C++ executable without prefix

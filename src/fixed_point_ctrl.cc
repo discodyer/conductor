@@ -55,8 +55,8 @@ int main(int argc, char **argv)
     ArduConductor apm(nh);
     FixedPoint fixed_point_red("filter_out",
                                {1280 / 2, 720 / 2}, nh,
-                               {0.5, 0.0, 0.9, 0.1, 20, 0.05},
-                               {0.5, 0.0, 0.9, 0.1, 20, 0.05});
+                               {0.65, 0.5, 0.9, 0.1, 20, 0.05},
+                               {0.65, 0.5, 0.9, 0.1, 20, 0.05});
 
     // wait for FCU connection
     while (ros::ok() && !apm.current_state.connected && !is_interrupted)
@@ -115,12 +115,14 @@ int main(int argc, char **argv)
 
                 if (apm.isTimeElapsed(20))
                 {
+                    apm.setSpeedBody(0, 0, 0, 0);
                     count++;
                 }
             }
             else if (apm.isTimeElapsed(20.0))
             {
                 apm.last_request = ros::Time::now();
+                apm.setSpeedBody(0, 0, 0, 0);
                 apm.mission_state = kLand;
             }
             break;
