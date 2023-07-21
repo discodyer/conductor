@@ -74,7 +74,7 @@ int main(int argc, char **argv)
         switch (apm.mission_state)
         {
         case prearm:
-            apm.set_mode_guided(5.0); // 修改飞行模式为 Guided (ArduCopter)
+            apm.setModeGuided(5.0); // 修改飞行模式为 Guided (ArduCopter)
             break;
 
         case arm:

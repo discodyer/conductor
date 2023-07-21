@@ -9,19 +9,19 @@
 ArduConductor::ArduConductor(int &argc, char **argv, const std::string &name, double rate, uint32_t options)
 	: BaseConductor(argc, argv, name, rate, options)
 {
-	init_node();
+	initNode();
 }
 
 ArduConductor::ArduConductor(ros::NodeHandle *nodehandle, double rate)
 	: BaseConductor(nodehandle, rate)
 {
-	init_node();
+	initNode();
 }
 
 /// @brief 设置全局坐标原点
 /// @param latitude 纬度
 /// @param longitude 经度
-void ArduConductor::send_gp_origin(double latitude, double longitude)
+void ArduConductor::sendGpOrigin(double latitude, double longitude)
 {
 	geographic_msgs::GeoPointStamped gp_origin;
 	gp_origin.position.latitude = latitude;
@@ -30,22 +30,22 @@ void ArduConductor::send_gp_origin(double latitude, double longitude)
 	ros::Time ros_time = ros::Time::now();
 	gp_origin.header.stamp.sec = ros_time.sec;
 	gp_origin.header.stamp.nsec = ros_time.nsec;
-	_set_gp_origin_pub.publish(gp_origin);
+	set_gp_origin_pub_.publish(gp_origin);
 	ROS_INFO(SUCCESS("Setting gp origin..."));
 }
 
 /// @brief 设置移动速度
 /// @param speed
 /// @return
-bool ArduConductor::set_move_speed(double speed)
+bool ArduConductor::setMoveSpeed(double speed)
 {
-	ros::ServiceClient _speed_client = _nh.serviceClient<mavros_msgs::CommandLong>("mavros/cmd/command");
+	ros::ServiceClient speed_client = nh_.serviceClient<mavros_msgs::CommandLong>("mavros/cmd/command");
 	mavros_msgs::CommandLong msg;
 	msg.request.command = mavros_msgs::CommandCode::DO_CHANGE_SPEED;
 	msg.request.param1 = 0; // ignored by Ardupilot
 	msg.request.param2 = speed;
 
-	if (_speed_client.call(msg) && msg.response.success)
+	if (speed_client.call(msg) && msg.response.success)
 	{
 		ROS_INFO(SUCCESS("Speed set: %0.2f"), speed);
 		return true;
@@ -63,7 +63,7 @@ bool ArduConductor::set_move_speed(double speed)
 /// @param z
 /// @param yaw_rate
 /// @return
-void ArduConductor::set_speed_body(double x, double y, double z, double yaw_rate)
+void ArduConductor::setSpeedBody(double x, double y, double z, double yaw_rate)
 {
 	using namespace mavros_msgs;
 	mavros_msgs::PositionTarget raw_target;
@@ -88,13 +88,13 @@ void ArduConductor::set_speed_body(double x, double y, double z, double yaw_rate
 	raw_target.velocity.y = y;
 	raw_target.velocity.z = z;
 	raw_target.yaw_rate = yaw_rate;
-	_set_raw_pub.publish(raw_target);
+	set_raw_pub_.publish(raw_target);
 }
 
 /// @brief FLU rad/s , must set continously, or the vehicle stops after a few seconds.(failsafe feature) used for adjusting yaw without setting others.
 /// @param yaw_rate
 /// @return
-void ArduConductor::set_angular_rate(double yaw_rate)
+void ArduConductor::setAngularRate(double yaw_rate)
 {
 	using namespace mavros_msgs;
 	mavros_msgs::PositionTarget raw_target;
@@ -110,7 +110,7 @@ void ArduConductor::set_angular_rate(double yaw_rate)
 	raw_target.position.y = 0;
 	raw_target.position.z = 0;
 	raw_target.yaw_rate = yaw_rate;
-	_set_raw_pub.publish(raw_target);
+	set_raw_pub_.publish(raw_target);
 }
 
 /// @brief flu meters rad. yaw = 0 when not used. x=y=z=0 when not used.
@@ -119,7 +119,7 @@ void ArduConductor::set_angular_rate(double yaw_rate)
 /// @param z
 /// @param yaw
 /// @return
-void ArduConductor::set_pose_body(double x, double y, double z, double yaw)
+void ArduConductor::setPoseBody(double x, double y, double z, double yaw)
 {
 	using namespace mavros_msgs;
 	mavros_msgs::PositionTarget raw_target;
@@ -135,11 +135,11 @@ void ArduConductor::set_pose_body(double x, double y, double z, double yaw)
 	raw_target.position.y = y;
 	raw_target.position.z = z;
 	raw_target.yaw = yaw;
-	_set_raw_pub.publish(raw_target);
+	set_raw_pub_.publish(raw_target);
 }
 
 /// @brief 悬停
-void ArduConductor::set_break()
+void ArduConductor::setBreak()
 {
 	using namespace mavros_msgs;
 	mavros_msgs::PositionTarget raw_target;
@@ -155,10 +155,10 @@ void ArduConductor::set_break()
 	raw_target.position.y = 0;
 	raw_target.position.z = 0;
 	raw_target.yaw = 0;
-	_set_raw_pub.publish(raw_target);
+	set_raw_pub_.publish(raw_target);
 }
 
-void ArduConductor::init_node()
+void ArduConductor::initNode()
 {
-	_set_gp_origin_pub = _nh.advertise<geographic_msgs::GeoPointStamped>("mavros/global_position/set_gp_origin", 10);
+	set_gp_origin_pub_ = nh_.advertise<geographic_msgs::GeoPointStamped>("mavros/global_position/set_gp_origin", 10);
 }

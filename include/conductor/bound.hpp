@@ -2,7 +2,7 @@
 #define BOUND_HPP
 
 template <typename T>
-constexpr T bound(T const& a, T const& limit) {
+constexpr T Bound(T const& a, T const& limit) {
     return std::max(std::min(a, limit), -limit);
 }
 

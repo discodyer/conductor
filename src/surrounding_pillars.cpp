@@ -71,10 +71,10 @@ int main(int argc, char **argv)
         switch (apm.mission_state)
         {
         case prearm:
-            if (apm.set_mode_guided(5.0)) // 修改飞行模式为 Guided (ArduCopter)
+            if (apm.setModeGuided(5.0)) // 修改飞行模式为 Guided (ArduCopter)
             {
-                apm.send_gp_origin();    // 如果切换成Guided模式就发送全局原点坐标
-                apm.set_move_speed(0.2); // 设置空速
+                apm.sendGpOrigin();    // 如果切换成Guided模式就发送全局原点坐标
+                apm.setMoveSpeed(0.2); // 设置空速
             }
             break;
 
@@ -92,21 +92,21 @@ int main(int argc, char **argv)
             break;
 
         case pose:
-            if (apm.is_time_elapsed(2.0) && count == 0)
+            if (apm.isTimeElapsed(2.0) && count == 0)
             {
-                apm.set_pose_body(0, 0, 0.6, 0);
+                apm.setPoseBody(0, 0, 0.6, 0);
                 ROS_INFO("takeoff to 1.0");
                 count ++;
             }
-            else if (apm.is_time_elapsed(4.0) && count == 1)
+            else if (apm.isTimeElapsed(4.0) && count == 1)
             {
-                // apm.set_speed_body(1, 0, 0, 0);
-                apm.set_move_speed(0.3); // 设置空速
-                apm.set_pose_body(2.70, 0.5, 0, 0);
+                // apm.setSpeedBody(1, 0, 0, 0);
+                apm.setMoveSpeed(0.3); // 设置空速
+                apm.setPoseBody(2.70, 0.5, 0, 0);
                 ROS_INFO("to 2.7, 0.5");
                 count++;
             }
-            else if (apm.is_time_elapsed(20.0))
+            else if (apm.isTimeElapsed(20.0))
             {
                 apm.last_request = ros::Time::now();
                 apm.mission_state = land;

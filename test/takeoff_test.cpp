@@ -72,8 +72,8 @@ int main(int argc, char **argv)
     pose.pose.position.y = 0;
     pose.pose.position.z = 1;
 
-    mavros_msgs::SetMode set_mode_guided;
-    set_mode_guided.request.custom_mode = "GUIDED";
+    mavros_msgs::SetMode setModeGuided;
+    setModeGuided.request.custom_mode = "GUIDED";
 
     mavros_msgs::CommandBool arm_cmd;
     arm_cmd.request.value = true;
@@ -91,8 +91,8 @@ int main(int argc, char **argv)
             if (current_state.mode != "GUIDED" &&
                 (ros::Time::now() - last_request > ros::Duration(5.0)))
             {
-                if (set_mode_client.call(set_mode_guided) &&
-                    set_mode_guided.response.mode_sent)
+                if (set_mode_client.call(setModeGuided) &&
+                    setModeGuided.response.mode_sent)
                 {
                     ROS_INFO("Guided enabled");
                     drone_state = arm;

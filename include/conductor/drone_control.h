@@ -104,7 +104,7 @@ ros::Subscriber key_sub;                           // 订阅器 - 按键
 void set_pose_PointA(float x, float y, float z, float yaw);
 
 // 发送全局位置原点
-void send_gp_origin(ros::NodeHandle &nh);
+void sendGpOrigin(ros::NodeHandle &nh);
 
 // 解锁无人机
 int arm_drone(ros::NodeHandle &nh);
@@ -128,7 +128,7 @@ void set_pose_PointA(float x, float y, float z, float yaw)
 }
 
 // 发送全局位置原点
-void send_gp_origin(ros::NodeHandle &nh)
+void sendGpOrigin(ros::NodeHandle &nh)
 {
     geographic_msgs::GeoPointStamped origin;
     origin.header.stamp = ros::Time::now();
@@ -192,7 +192,7 @@ int land(ros::NodeHandle &nh)
 }
 
 // 设置速度（机体坐标系）
-void set_speed_body(float vx, float vy, float vz, float yaw_rate)
+void setSpeedBody(float vx, float vy, float vz, float yaw_rate)
 {
     mavros_msgs::PositionTarget set_speed;
     set_speed.header.stamp = ros::Time::now();
@@ -240,7 +240,7 @@ void set_pose_local(float x, float y, float z, float yaw)
 }
 
 // 设置机体坐标系下的姿态
-void set_pose_body(float x, float y, float z, float yaw)
+void setPoseBody(float x, float y, float z, float yaw)
 {
     geometry_msgs::PoseStamped pose;
     pose.header.stamp = ros::Time::now();
