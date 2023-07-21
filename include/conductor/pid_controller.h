@@ -6,11 +6,12 @@
 
 class PIDController {
 public:
-    PIDController(double kp, double ki, double kd,double windup_guard, double output_bound, double sample_time = 0.1);
-    double calculateOutput(double feedback_value);
+    PIDController(double kp, double ki, double kd, double windup_guard, double output_bound, double sample_time);
+    double calcOutput(double feedback_value);
     double getBoundedOutput(double feedback_value);
     void clear();
 
+    void setSetpoint(double setpoint);
     void setKp(double proportional_gain);
     void setKi(double integral_gain);
     void setKd(double derivative_gain);
@@ -33,7 +34,6 @@ private:
     double i_term_;
     double d_term_;
     double last_control_output_;
-
     double sample_time_;
     ros::Time last_time_;
     ros::Time current_time_;

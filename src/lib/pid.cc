@@ -20,7 +20,7 @@ void PIDController::clear()
     last_control_output_ = 0.0;
 }
 
-double PIDController::calculateOutput(double feedback_value)
+double PIDController::calcOutput(double feedback_value)
 {
     // 计算误差
     double error = setpoint_ - feedback_value;
@@ -60,7 +60,7 @@ double PIDController::calculateOutput(double feedback_value)
 
 double PIDController::getBoundedOutput(double feedback_value)
 {
-    return Bound<double>(calculateOutput(feedback_value), output_bound_);
+    return Bound<double>(calcOutput(feedback_value), output_bound_);
 }
 
 void PIDController::setKp(double proportional_gain)
@@ -91,4 +91,9 @@ void PIDController::setSampleTime(double sample_time)
 void PIDController::setOutputBound(double output_bound)
 {
     output_bound_ = output_bound;
+}
+
+void PIDController::setSetpoint(double setpoint)
+{
+    setpoint_ = setpoint;
 }
