@@ -134,7 +134,7 @@ include_directories(
 )
 
 ## Declare a C++ library
-add_library(Conductor
+add_library(conductor
   src/lib/base.cc
   src/lib/apm.cc
   src/lib/pid.cc
@@ -156,12 +156,12 @@ add_library(Conductor
 
 add_executable(takeoff example/takeoff_example.cc)
 add_dependencies(takeoff ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(takeoff Conductor ${catkin_LIBRARIES})
+target_link_libraries(takeoff conductor ${catkin_LIBRARIES})
 
 # 绕圆飞行（有毛病）
 add_executable(circle src/surrounding_pillars.cc)
 add_dependencies(circle ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(circle Conductor ${catkin_LIBRARIES})
+target_link_libraries(circle conductor ${catkin_LIBRARIES})
 
 # add_dependencies(test beginner_tutorials_generate_messages_cpp)
 
