@@ -55,7 +55,7 @@ int main(int argc, char **argv)
     ros::NodeHandle nh;
     signal(SIGINT, safeSigintHandler);
 
-    ArduConductor apm(&nh);
+    ArduConductor apm(nh);
 
 
     // wait for FCU connection

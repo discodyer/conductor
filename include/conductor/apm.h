@@ -9,8 +9,8 @@ protected:
     void initNode() override;
 
 public:
-    ArduConductor(int &argc, char **argv, const std::string &name, double rate = 20, uint32_t options = 0);
-    ArduConductor(ros::NodeHandle *nodehandle, double rate = 20);
+    // ArduConductor(int &argc, char **argv, const std::string &name, double rate = 20, uint32_t options = 0);
+    ArduConductor(ros::NodeHandle &nodehandle, double rate = 20);
     
     void sendGpOrigin(double latitude = 32.108693377508494, double longitude = 118.92943049870283);
     bool setMoveSpeed(double speed);

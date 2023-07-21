@@ -7,20 +7,20 @@
 /// @param name 节点名称
 /// @param rate_num 循环频率
 /// @param options 节点实例化选项
-BaseConductor::BaseConductor(int &argc, char **argv, const std::string &name, double rate_num, uint32_t options)
-    : rate(rate_num)
-{
-    ros::init(argc, argv, name, options);
-    mission_state = kPrearm;
-    this->initNode();
-}
+// BaseConductor::BaseConductor(int &argc, char **argv, const std::string &name, double rate_num, uint32_t options)
+//     : rate(rate_num)
+// {
+//     ros::init(argc, argv, name, options);
+//     mission_state = kPrearm;
+//     this->initNode();
+// }
 
 /// @brief
 /// @param nodehandle 外部 NodeHandle
 /// @param rate_num loop循环频率
-BaseConductor::BaseConductor(ros::NodeHandle *nodehandle, double rate_num)
+BaseConductor::BaseConductor(ros::NodeHandle &nodehandle, double rate_num)
     : rate(rate_num),
-      nh_(*nodehandle)
+      nh_(nodehandle)
 {
     mission_state = kPrearm;
     this->initNode();

@@ -3,10 +3,17 @@
 
 PIDController::PIDController(double kp, double ki, double kd, double windup_guard, double output_bound, double sample_time)
     : kp_(kp), ki_(ki), kd_(kd), windup_guard_(windup_guard), output_bound_(output_bound), sample_time_(sample_time),
-      error_(0.0), last_error_(0.0), integral_(0.0), derivative_(0.0), last_control_output_(0.0)
+      error_(0.0), last_error_(0.0), integral_(0.0), derivative_(0.0), last_control_output_(0.0),
+      last_time_(ros::Time::now()), current_time_(ros::Time::now())
 {
-    last_time_ = ros::Time::now();
-    current_time_ = ros::Time::now();
+    clear();
+}
+
+PIDController::PIDController(const PidParams &params)
+    : kp_(params.kp), ki_(params.ki), kd_(params.kd), windup_guard_(params.windup_guard), output_bound_(params.output_bound), sample_time_(params.sample_time),
+      error_(0.0), last_error_(0.0), integral_(0.0), derivative_(0.0), last_control_output_(0.0),
+      last_time_(ros::Time::now()), current_time_(ros::Time::now())
+{
     clear();
 }
 
@@ -51,16 +58,26 @@ double PIDController::calcOutput(double feedback_value)
         // 更新上次更新时间和上次误差
         last_time_ = ros::Time::now();
         last_error_ = error;
-
-        // 计算PID控制器输出并保存为上次控制输出
-        last_control_output_ = p_term_ + (ki_ * i_term_) + (kd_ * d_term_);
     }
+    
+    // 计算PID控制器输出
+    last_control_output_ = p_term_ + (ki_ * i_term_) + (kd_ * d_term_);
+    return last_control_output_;
+}
+
+double PIDController::calcOutput()
+{
     return last_control_output_;
 }
 
 double PIDController::getBoundedOutput(double feedback_value)
 {
     return Bound<double>(calcOutput(feedback_value), output_bound_);
+}
+
+double PIDController::getBoundedOutput()
+{
+    return Bound<double>(calcOutput(), output_bound_);
 }
 
 void PIDController::setKp(double proportional_gain)

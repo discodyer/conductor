@@ -1,6 +1,6 @@
 /**
- * @file surrounding_pillars.cpp
- * @brief 绕杆飞行测试，使用Conductor封装库
+ * @file fixed_point_ctrl.cpp
+ * @brief 定点测试，使用Conductor封装库
  */
 
 #include <ros/ros.h>
@@ -17,6 +17,7 @@
 #include "conductor/mission_state.h"
 #include "conductor/ansi_color.h"
 #include "conductor/apm.h"
+#include "conductor/fixed_point.h"
 
 #include "signal.h" //necessary for the Custom SIGINT handler
 #include "stdio.h"  //necessary for the Custom SIGINT handler
@@ -52,6 +53,10 @@ int main(int argc, char **argv)
     signal(SIGINT, safeSigintHandler);
 
     ArduConductor apm(nh);
+    FixedPoint fixed_point_red("filter_out",
+                               {1280 / 2, 720 / 2}, nh,
+                               {0.5, 0.0, 0.9, 0.1, 20, 0.05},
+                               {0.5, 0.0, 0.9, 0.1, 20, 0.05});
 
     // wait for FCU connection
     while (ros::ok() && !apm.current_state.connected && !is_interrupted)
@@ -96,15 +101,22 @@ int main(int argc, char **argv)
             {
                 apm.setPoseBody(0, 0, 0.6, 0);
                 ROS_INFO("takeoff to 1.0");
-                count ++;
+                fixed_point_red.clear();
+                count++;
             }
             else if (apm.isTimeElapsed(4.0) && count == 1)
             {
                 // apm.setSpeedBody(1, 0, 0, 0);
-                apm.setMoveSpeed(0.3); // 设置空速
-                apm.setPoseBody(2.70, 0.5, 0, 0);
-                ROS_INFO("to 2.7, 0.5");
-                count++;
+                // apm.setMoveSpeed(0.3); // 设置空速
+                // apm.setPoseBody(2.70, 0.5, 0, 0);
+                // ROS_INFO("to 2.7, 0.5");
+
+                apm.setSpeedBody(fixed_point_red.getBoundedOutput().x * 0.01, fixed_point_red.getBoundedOutput().y * 0.01, 0, 0);
+
+                if (apm.isTimeElapsed(20))
+                {
+                    count++;
+                }
             }
             else if (apm.isTimeElapsed(20.0))
             {

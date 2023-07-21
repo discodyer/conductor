@@ -134,11 +134,17 @@ include_directories(
 )
 
 ## Declare a C++ library
-add_library(conductor
-  src/lib/base.cc
-  src/lib/apm.cc
-  src/lib/pid.cc
-)
+# add_library(conductor
+#   src/lib/base.cc
+#   src/lib/apm.cc
+#   src/lib/pid.cc
+# )
+
+# 获取 src/lib/ 目录下的所有源文件
+file(GLOB CONDUCTOR_SOURCES "src/lib/*.cc")
+
+# 将获取的源文件添加到库中
+add_library(conductor ${CONDUCTOR_SOURCES})
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
@@ -162,6 +168,11 @@ target_link_libraries(takeoff conductor ${catkin_LIBRARIES})
 add_executable(circle src/surrounding_pillars.cc)
 add_dependencies(circle ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(circle conductor ${catkin_LIBRARIES})
+
+
+add_executable(fixed_point_ctrl src/fixed_point_ctrl.cc)
+add_dependencies(fixed_point_ctrl ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(fixed_point_ctrl conductor ${catkin_LIBRARIES})
 
 # add_dependencies(test beginner_tutorials_generate_messages_cpp)
 

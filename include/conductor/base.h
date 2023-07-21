@@ -27,8 +27,8 @@ protected:
     void subStateCallback(const mavros_msgs::State::ConstPtr &msg);
 
 public:
-    BaseConductor(int &argc, char **argv, const std::string &name, double rate = 20, uint32_t options = 0);
-    BaseConductor(ros::NodeHandle *nodehandle, double rate = 20);
+    // BaseConductor(int &argc, char **argv, const std::string &name, double rate = 20, uint32_t options = 0);
+    BaseConductor(ros::NodeHandle &nodehandle, double rate = 20);
 
     MissionState mission_state;
 

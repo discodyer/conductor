@@ -4,11 +4,25 @@
 #include <ros/time.h>
 #include <ros/duration.h>
 
-class PIDController {
+struct PidParams
+{
+    double kp;
+    double ki;
+    double kd;
+    double windup_guard;
+    double output_bound;
+    double sample_time;
+};
+
+class PIDController
+{
 public:
     PIDController(double kp, double ki, double kd, double windup_guard, double output_bound, double sample_time);
+    PIDController(const PidParams& params);
     double calcOutput(double feedback_value);
+    double calcOutput();
     double getBoundedOutput(double feedback_value);
+    double getBoundedOutput();
     void clear();
 
     void setSetpoint(double setpoint);

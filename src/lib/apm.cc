@@ -6,13 +6,13 @@
 #include "conductor/ansi_color.h"
 #include "conductor/apm.h"
 
-ArduConductor::ArduConductor(int &argc, char **argv, const std::string &name, double rate, uint32_t options)
-	: BaseConductor(argc, argv, name, rate, options)
-{
-	initNode();
-}
+// ArduConductor::ArduConductor(int &argc, char **argv, const std::string &name, double rate, uint32_t options)
+// 	: BaseConductor(argc, argv, name, rate, options)
+// {
+// 	initNode();
+// }
 
-ArduConductor::ArduConductor(ros::NodeHandle *nodehandle, double rate)
+ArduConductor::ArduConductor(ros::NodeHandle &nodehandle, double rate)
 	: BaseConductor(nodehandle, rate)
 {
 	initNode();
