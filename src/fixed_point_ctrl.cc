@@ -52,11 +52,20 @@ int main(int argc, char **argv)
 
     signal(SIGINT, safeSigintHandler);
 
+    PidParams pidpara{1, 1, 0, 0.1, 20, 0.05};
+
+    nh.getParam("kp", pidpara.kp);
+    nh.getParam("ki", pidpara.ki);
+    nh.getParam("kd", pidpara.kd);
+    nh.getParam("windup_guard", pidpara.windup_guard);
+    nh.getParam("output_bound", pidpara.output_bound);
+    nh.getParam("sample_time", pidpara.sample_time);
+
     ArduConductor apm(nh);
     FixedPoint fixed_point_red("filter_out",
                                {1280 / 2, 720 / 2}, nh,
-                               {0.65, 0.5, 0.9, 0.1, 20, 0.05},
-                               {0.65, 0.5, 0.9, 0.1, 20, 0.05});
+                               pidpara,
+                               pidpara);
 
     // wait for FCU connection
     while (ros::ok() && !apm.current_state.connected && !is_interrupted)
