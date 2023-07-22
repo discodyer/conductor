@@ -16,7 +16,7 @@ void FixedPoint::subPointCallback(const geometry_msgs::Point::ConstPtr &msg)
     this->point_ = *msg;
     ROS_INFO(SUCCESS("\nGot point \nX: %0.2f\nY: %0.2f"), point_.x, point_.y);
     auto offset = fixed_point::Point(point_.y - center_.y , point_.x - center_.x);
-    ROS_INFO(SUCCESS("\nOffset \nX: %0.2f\nY: %0.2f"), center_.y - point_.y, center_.x - point_.x);
+    ROS_INFO(SUCCESS("\nOffset \nX: %0.2f\nY: %0.2f"), offset.x, offset.y);
     calcXYOutput(offset);
     ROS_INFO(SUCCESS("\nOutput \nX: %0.2f\nY: %0.2f"), last_output_.x, last_output_.y);
     ROS_INFO(SUCCESS("\n--------------------------"));
