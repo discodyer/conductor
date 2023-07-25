@@ -52,18 +52,18 @@ int main(int argc, char **argv)
 
     signal(SIGINT, safeSigintHandler);
 
-    PidParams pidpara{1, 1, 0, 0.1, 20, 0.05};
+    PidParams pidpara{0.17, 0.0, 0.015, 10.0, 40, 0.0};
 
-    nh.getParam("kp", pidpara.kp);
-    nh.getParam("ki", pidpara.ki);
-    nh.getParam("kd", pidpara.kd);
-    nh.getParam("windup_guard", pidpara.windup_guard);
-    nh.getParam("output_bound", pidpara.output_bound);
-    nh.getParam("sample_time", pidpara.sample_time);
+    // nh.getParam("kp", pidpara.kp);
+    // nh.getParam("ki", pidpara.ki);
+    // nh.getParam("kd", pidpara.kd);
+    // nh.getParam("windup_guard", pidpara.windup_guard);
+    // nh.getParam("output_bound", pidpara.output_bound);
+    // nh.getParam("sample_time", pidpara.sample_time);
 
     ArduConductor apm(nh);
     FixedPoint fixed_point_red("filter_out",
-                               {1280 / 2, 720 / 2}, nh,
+                               {800 / 2, 330}, nh,
                                pidpara,
                                pidpara);
 
@@ -88,7 +88,7 @@ int main(int argc, char **argv)
             if (apm.setModeGuided(5.0)) // 修改飞行模式为 Guided (ArduCopter)
             {
                 apm.sendGpOrigin();    // 如果切换成Guided模式就发送全局原点坐标
-                apm.setMoveSpeed(0.2); // 设置空速
+                apm.setMoveSpeed(0.15); // 设置空速
             }
             break;
 
@@ -137,7 +137,7 @@ int main(int argc, char **argv)
             break;
 
         case kLand:
-            if (apm.land(2.0)) // 10s后降落
+            if (apm.land(5.0)) // 10s后降落
             {
                 ros::shutdown();
             }

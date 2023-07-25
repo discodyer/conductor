@@ -47,6 +47,8 @@ auto FixedPoint::getBoundedOutput() -> fixed_point::Point
 
 void FixedPoint::clear()
 {
+    last_output_.x = 0.0;
+    last_output_.y = 0.0;
     pid_controller_x.clear();
     pid_controller_y.clear();
 }
