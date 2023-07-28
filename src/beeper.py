@@ -19,7 +19,7 @@ def listener():
     # anonymous=True flag means that rospy will choose a unique
     # name for our 'listener' node so that multiple listeners can
     # run simultaneously.
-    rospy.init_node('Beeper', anonymous=False)
+    rospy.initNode('Beeper', anonymous=False)
 
     wiringpi.wiringPiSetup()
     wiringpi.pinMode(16, GPIO.OUTPUT)

@@ -2,7 +2,10 @@ cmake_minimum_required(VERSION 3.0.2)
 project(conductor)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
-# add_compile_options(-std=c++11)
+add_compile_options(-std=c++11)
+
+## UTF-8 编码
+add_compile_options(-fexec-charset=UTF-8)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -131,9 +134,17 @@ include_directories(
 )
 
 ## Declare a C++ library
-# add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/conductor.cpp
+# add_library(conductor
+#   src/lib/base.cc
+#   src/lib/apm.cc
+#   src/lib/pid.cc
 # )
+
+# 获取 src/lib/ 目录下的所有源文件
+file(GLOB CONDUCTOR_SOURCES "src/lib/*.cc")
+
+# 将获取的源文件添加到库中
+add_library(conductor ${CONDUCTOR_SOURCES})
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
@@ -145,10 +156,33 @@ include_directories(
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/conductor_node.cpp)
 
-add_executable(takeoff_test src/takeoff_test.cpp)
-add_dependencies(takeoff_test ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# add_executable(takeoff_test test/takeoff_test.cpp)
+# add_dependencies(takeoff_test ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+# target_link_libraries(takeoff_test ${catkin_LIBRARIES})
 
-target_link_libraries(takeoff_test ${catkin_LIBRARIES})
+add_executable(takeoff example/takeoff_example.cc)
+add_dependencies(takeoff ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(takeoff conductor ${catkin_LIBRARIES})
+
+# 绕圆飞行（有毛病）
+add_executable(circle src/surrounding_pillars.cc)
+add_dependencies(circle ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(circle conductor ${catkin_LIBRARIES})
+
+# 飞矩形
+add_executable(fly_rectangle example/fly_rectangle.cc)
+add_dependencies(fly_rectangle ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(fly_rectangle conductor ${catkin_LIBRARIES})
+
+
+add_executable(fixed_point_ctrl src/fixed_point_ctrl.cc)
+add_dependencies(fixed_point_ctrl ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(fixed_point_ctrl conductor ${catkin_LIBRARIES})
+
+add_executable(fixed_point_ctrl_test test/fixed_point_ctrl_test.cc)
+add_dependencies(fixed_point_ctrl_test ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(fixed_point_ctrl_test conductor ${catkin_LIBRARIES})
+
 # add_dependencies(test beginner_tutorials_generate_messages_cpp)
 
 ## Rename C++ executable without prefix
@@ -185,9 +219,18 @@ target_link_libraries(takeoff_test ${catkin_LIBRARIES})
 # install(TARGETS ${PROJECT_NAME}_node
 #   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 # )
-install(TARGETS takeoff_test
-   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
- )
+# install(TARGETS takeoff_test
+#    RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+#  )
+
+install(TARGETS takeoff
+ RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
+# 绕圆飞行（有毛病）
+install(TARGETS circle
+ RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
 
 catkin_install_python(PROGRAMS src/beeper.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

@@ -1,6 +1,6 @@
 /**
- * @file offb_node.cpp
- * @brief Offboard control example node, written with MAVROS version 0.19.x, PX4 Pro Flight
+ * @file takeoff_test.cpp
+ * @brief Ardupilot 起飞降落测试
  * Stack and tested in Gazebo Classic SITL
  */
 
@@ -10,7 +10,7 @@
 #include <mavros_msgs/SetMode.h>
 #include <mavros_msgs/State.h>
 #include <mavros_msgs/CommandTOL.h>
-#include <conductor/mission_state.hpp>
+#include <conductor/mission_state.h>
 #include "signal.h" //necessary for the Custom SIGINT handler
 #include "stdio.h"  //necessary for the Custom SIGINT handler
 
@@ -58,7 +58,7 @@ int main(int argc, char **argv)
     // the setpoint publishing rate MUST be faster than 2Hz
     ros::Rate rate(50.0);
 
-    mission_state drone_state = prearm;
+    MissionState drone_state = kPrearm;
 
     // wait for FCU connection
     while (ros::ok() && !current_state.connected)
@@ -72,16 +72,8 @@ int main(int argc, char **argv)
     pose.pose.position.y = 0;
     pose.pose.position.z = 1;
 
-    // send a few setpoints before starting
-    // for (int i = 100; ros::ok() && i > 0; --i)
-    // {
-    //     local_pos_pub.publish(pose);
-    //     ros::spinOnce();
-    //     rate.sleep();
-    // }
-
-    mavros_msgs::SetMode set_mode_guided;
-    set_mode_guided.request.custom_mode = "GUIDED";
+    mavros_msgs::SetMode setModeGuided;
+    setModeGuided.request.custom_mode = "GUIDED";
 
     mavros_msgs::CommandBool arm_cmd;
     arm_cmd.request.value = true;
@@ -95,15 +87,15 @@ int main(int argc, char **argv)
     {
         switch (drone_state)
         {
-        case prearm:
+        case kPrearm:
             if (current_state.mode != "GUIDED" &&
                 (ros::Time::now() - last_request > ros::Duration(5.0)))
             {
-                if (set_mode_client.call(set_mode_guided) &&
-                    set_mode_guided.response.mode_sent)
+                if (set_mode_client.call(setModeGuided) &&
+                    setModeGuided.response.mode_sent)
                 {
                     ROS_INFO("Guided enabled");
-                    drone_state = arm;
+                    drone_state = kArm;
                 }
                 last_request = ros::Time::now();
             }
@@ -111,12 +103,12 @@ int main(int argc, char **argv)
                      (ros::Time::now() - last_request > ros::Duration(5.0)))
             {
                 ROS_INFO("Guided enabled");
-                drone_state = arm;
+                drone_state = kArm;
                 last_request = ros::Time::now();
             }
             break;
 
-        case arm:
+        case kArm:
             if (!current_state.armed &&
                 (ros::Time::now() - last_request > ros::Duration(5.0)))
             {
@@ -124,18 +116,18 @@ int main(int argc, char **argv)
                     arm_cmd.response.success)
                 {
                     ROS_INFO("Vehicle armed!");
-                    drone_state = takeoff;
+                    drone_state = kTakeoff;
                 }
                 else
                 {
                     ROS_INFO("Vehicle arm failed!");
-                    drone_state = prearm;
+                    drone_state = kPrearm;
                 }
                 last_request = ros::Time::now();
             }
             break;
 
-        case takeoff:
+        case kTakeoff:
             if (ros::Time::now() - last_request > ros::Duration(3.0))
             {
                 if (takeoff_client.call(takeoff_cmd))
@@ -147,7 +139,7 @@ int main(int argc, char **argv)
                 else
                 {
                     ROS_INFO("Vehicle Takeoff Failed!");
-                    drone_state = arm;
+                    drone_state = kArm;
                     last_request = ros::Time::now();
                 }
                 
@@ -155,7 +147,7 @@ int main(int argc, char **argv)
 
             break;
 
-        case land:
+        case kLand:
             if (current_state.armed &&
                 (ros::Time::now() - last_request > ros::Duration(10.0)))
             {
@@ -164,7 +156,7 @@ int main(int argc, char **argv)
                     land_cmd.response.success)
                 {
                     ROS_INFO("Vehicle landed!");
-                    drone_state = prearm;
+                    drone_state = kPrearm;
                     ros::shutdown();
                 }
                 last_request = ros::Time::now();
