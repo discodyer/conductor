@@ -160,9 +160,15 @@ add_library(conductor ${CONDUCTOR_SOURCES})
 # add_dependencies(takeoff_test ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 # target_link_libraries(takeoff_test ${catkin_LIBRARIES})
 
+# 起飞样例
 add_executable(takeoff example/takeoff_example.cc)
 add_dependencies(takeoff ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(takeoff conductor ${catkin_LIBRARIES})
+
+# 设置全局坐标原点
+add_executable(set_gp_origin example/set_gp_origin.cc)
+add_dependencies(set_gp_origin ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(set_gp_origin conductor ${catkin_LIBRARIES})
 
 # 绕圆飞行（有毛病）
 add_executable(circle src/surrounding_pillars.cc)
@@ -174,11 +180,12 @@ add_executable(fly_rectangle example/fly_rectangle.cc)
 add_dependencies(fly_rectangle ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(fly_rectangle conductor ${catkin_LIBRARIES})
 
-
+# 定点飞行
 add_executable(fixed_point_ctrl src/fixed_point_ctrl.cc)
 add_dependencies(fixed_point_ctrl ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(fixed_point_ctrl conductor ${catkin_LIBRARIES})
 
+# 定点飞行测试
 add_executable(fixed_point_ctrl_test test/fixed_point_ctrl_test.cc)
 add_dependencies(fixed_point_ctrl_test ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(fixed_point_ctrl_test conductor ${catkin_LIBRARIES})

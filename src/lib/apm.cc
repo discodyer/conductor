@@ -31,7 +31,7 @@ void ArduConductor::sendGpOrigin(double latitude, double longitude)
 	gp_origin.header.stamp.sec = ros_time.sec;
 	gp_origin.header.stamp.nsec = ros_time.nsec;
 	set_gp_origin_pub_.publish(gp_origin);
-	ROS_INFO(SUCCESS("Setting gp origin..."));
+	ROS_INFO(SUCCESS("Setting gp origin...(%0.2f, %0.2f)"), longitude, latitude);
 }
 
 /// @brief 设置移动速度
