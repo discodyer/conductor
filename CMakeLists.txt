@@ -7,6 +7,8 @@ add_compile_options(-std=c++11)
 ## UTF-8 编码
 add_compile_options(-fexec-charset=UTF-8)
 
+include_directories(include/rapidjson/include) ## add rapidjson
+
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
@@ -189,6 +191,11 @@ target_link_libraries(fixed_point_ctrl conductor ${catkin_LIBRARIES})
 add_executable(fixed_point_ctrl_test test/fixed_point_ctrl_test.cc)
 add_dependencies(fixed_point_ctrl_test ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(fixed_point_ctrl_test conductor ${catkin_LIBRARIES})
+
+# 定点飞行测试
+add_executable(read_waypoints_json test/read_waypoints_json.cc)
+add_dependencies(read_waypoints_json ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(read_waypoints_json conductor ${catkin_LIBRARIES})
 
 # add_dependencies(test beginner_tutorials_generate_messages_cpp)
 
