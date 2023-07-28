@@ -1,3 +1,0 @@
-dronekit
-dronekit-sitl
-pyserial
