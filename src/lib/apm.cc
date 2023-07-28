@@ -138,6 +138,25 @@ void ArduConductor::setPoseBody(double x, double y, double z, double yaw)
 	set_raw_pub_.publish(raw_target);
 }
 
+void ArduConductor::setPoseWorld(double x, double y, double z, double yaw)
+{
+	using namespace mavros_msgs;
+	mavros_msgs::PositionTarget raw_target;
+	raw_target.coordinate_frame = PositionTarget::FRAME_LOCAL_OFFSET_NED;
+	raw_target.type_mask = PositionTarget::IGNORE_VX |
+						   PositionTarget::IGNORE_VY |
+						   PositionTarget::IGNORE_VZ |
+						   PositionTarget::IGNORE_AFX |
+						   PositionTarget::IGNORE_AFY |
+						   PositionTarget::IGNORE_AFZ |
+						   PositionTarget::IGNORE_YAW_RATE;
+	raw_target.position.x = x;
+	raw_target.position.y = y;
+	raw_target.position.z = z;
+	raw_target.yaw = yaw;
+	set_raw_pub_.publish(raw_target);
+}
+
 /// @brief 悬停
 void ArduConductor::setBreak()
 {

@@ -17,6 +17,7 @@ public:
     void setSpeedBody(double x, double y, double z, double yaw_rate); 
     void setAngularRate(double yaw_rate);
     void setPoseBody(double x, double y, double z, double yaw);
+    void setPoseWorld(double x, double y, double z, double yaw);
     void setBreak();
 
     ~ArduConductor(){};
