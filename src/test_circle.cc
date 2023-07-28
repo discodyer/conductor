@@ -1,3 +1,9 @@
+/*!
+ * @file test_circle.cc
+ * @brief  not used
+ * 
+ */
+
 #include "conductor/drone_control.h"
 
 int main(int argc, char **argv)

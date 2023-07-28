@@ -1,3 +1,8 @@
+/*!
+ * @file drone_control.h
+ * @brief  not used
+ * 
+ */
 #ifndef DRONE_CONTROL_H
 #define DRONE_CONTROL_H
 
