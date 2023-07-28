@@ -169,12 +169,17 @@ add_executable(circle src/surrounding_pillars.cc)
 add_dependencies(circle ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(circle conductor ${catkin_LIBRARIES})
 
+# 飞矩形
+add_executable(fly_rectangle example/fly_rectangle.cc)
+add_dependencies(fly_rectangle ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(fly_rectangle conductor ${catkin_LIBRARIES})
+
 
 add_executable(fixed_point_ctrl src/fixed_point_ctrl.cc)
 add_dependencies(fixed_point_ctrl ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(fixed_point_ctrl conductor ${catkin_LIBRARIES})
 
-add_executable(fixed_point_ctrl_test src/fixed_point_ctrl_test.cc)
+add_executable(fixed_point_ctrl_test test/fixed_point_ctrl_test.cc)
 add_dependencies(fixed_point_ctrl_test ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(fixed_point_ctrl_test conductor ${catkin_LIBRARIES})
 
