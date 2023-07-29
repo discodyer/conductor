@@ -45,8 +45,14 @@ class WaypointManager
 public:
     WaypointManager(const std::string &jsonFilePath);
 
-    // 获取下一个航点
+    // 获取并转到下一个航点
     bool getNextWaypoint(way_point::Waypoint &waypoint);
+    
+    // 转到下一个航点
+    bool goToNextWaypoint();
+
+    // 获取当前航点信息
+    way_point::Waypoint getCurrentWaypoint() const;
 
     // 判断是否满足航点延时
     bool isWaypointDelaySatisfied() const;
@@ -56,11 +62,13 @@ public:
 
     // 输出当前航点的信息
     void printCurrentWaypoint() const;
+    void printCurrentWaypointLoop();
 
 private:
     std::vector<way_point::Waypoint> waypoints_;
     size_t current_waypoint_index_;
     ros::Time last_waypoint_time_;
+    bool is_current_waypoint_published_;
 };
 
 #endif // WAY_POINT_H

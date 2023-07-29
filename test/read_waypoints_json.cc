@@ -12,18 +12,21 @@ int main(int argc, char **argv)
 
     // 创建 WaypointManager 实例，并从 JSON 文件读取航点数据
     WaypointManager waypointManager(jsonFilePath);
+    ros::Rate rate(10);
 
     // 输出航点数据
     while (ros::ok())
     {
-        waypointManager.printCurrentWaypoint();
-        ros::Duration(1.0).sleep(); // 每秒输出一次航点数据
-        ros::spinOnce();
-        way_point::Waypoint w;
-        if (!waypointManager.getNextWaypoint(w))
+        waypointManager.printCurrentWaypointLoop();
+        if(waypointManager.isWaypointDelaySatisfied())
         {
-            break;
+            if(!waypointManager.goToNextWaypoint())
+            {
+                break;
+            }
         }
+        ros::spinOnce();
+        rate.sleep();
     }
     ros::shutdown();
     return 0;

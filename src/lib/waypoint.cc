@@ -4,7 +4,7 @@
 #include "conductor/ansi_color.h"
 
 WaypointManager::WaypointManager(const std::string &jsonFilePath)
-    : current_waypoint_index_(0), last_waypoint_time_(ros::Time::now())
+    : current_waypoint_index_(0), last_waypoint_time_(ros::Time::now()), is_current_waypoint_published_(false)
 {
     // 打开 JSON 文件
     std::ifstream ifs(jsonFilePath);
@@ -147,12 +147,57 @@ WaypointManager::WaypointManager(const std::string &jsonFilePath)
 
 bool WaypointManager::getNextWaypoint(way_point::Waypoint &waypoint)
 {
-    if (current_waypoint_index_ < waypoints_.size())
+    if (current_waypoint_index_ < waypoints_.size() - 1)
     {
         waypoint = waypoints_[++current_waypoint_index_];
         return true;
     }
+    else
+    {
+        return false;
+    }
+}
+
+bool WaypointManager::goToNextWaypoint()
+{
+    if (current_waypoint_index_ < waypoints_.size() - 1)
+    {
+        // 获取当前时间戳
+        ros::Time current_time = ros::Time::now();
+
+        // 判断是否满足航点延时
+        if ((current_time - last_waypoint_time_).toSec() >= waypoints_[current_waypoint_index_].delay)
+        {
+            // 更新上一次航点发布的时间戳
+            last_waypoint_time_ = current_time;
+
+            // 转到下一个航点
+            current_waypoint_index_++;
+
+            is_current_waypoint_published_ = false;
+            return true;
+        }
+    }
     return false;
+}
+
+way_point::Waypoint WaypointManager::getCurrentWaypoint() const
+{
+    if (current_waypoint_index_ < waypoints_.size())
+    {
+        return waypoints_[current_waypoint_index_];
+    }
+    // 如果当前航点索引无效，返回一个默认的空航点
+    way_point::Waypoint emptyWaypoint;
+    emptyWaypoint.index = 0;
+    emptyWaypoint.type = way_point::WaypointType::kPoseWorld;
+    emptyWaypoint.position.x = 0.0;
+    emptyWaypoint.position.y = 0.0;
+    emptyWaypoint.position.z = 0.0;
+    emptyWaypoint.yaw = 0.0;
+    emptyWaypoint.delay = 0.0;
+    emptyWaypoint.air_speed = 0.0;
+    return emptyWaypoint;
 }
 
 bool WaypointManager::isWaypointDelaySatisfied() const
@@ -190,6 +235,30 @@ void WaypointManager::printCurrentWaypoint() const
         ROS_INFO("Delay: %f", waypoint.delay);
         ROS_INFO("Air Speed: %f", waypoint.air_speed);
         ROS_INFO(COLORED_TEXT("-----------------------------", "\033[1m"));
+    }
+    else
+    {
+        ROS_INFO("No more waypoints to process.");
+    }
+}
+
+void WaypointManager::printCurrentWaypointLoop()
+{
+    if (current_waypoint_index_ < waypoints_.size())
+    {
+        if (!is_current_waypoint_published_)
+        {
+            const way_point::Waypoint &waypoint = waypoints_[current_waypoint_index_];
+            ROS_INFO("Current Waypoint Information:");
+            ROS_INFO("Index: %zu", waypoint.index);
+            ROS_INFO("Type: %d", static_cast<int>(waypoint.type));
+            ROS_INFO("Position: x= %f, y= %f, z= %f", waypoint.position.x, waypoint.position.y, waypoint.position.z);
+            ROS_INFO("Yaw: %f", waypoint.yaw);
+            ROS_INFO("Delay: %f", waypoint.delay);
+            ROS_INFO("Air Speed: %f", waypoint.air_speed);
+            ROS_INFO(COLORED_TEXT("-----------------------------", "\033[1m"));
+            is_current_waypoint_published_ = true;
+        }
     }
     else
     {
