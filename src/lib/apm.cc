@@ -142,7 +142,7 @@ void ArduConductor::setPoseWorld(double x, double y, double z, double yaw)
 {
 	using namespace mavros_msgs;
 	mavros_msgs::PositionTarget raw_target;
-	raw_target.coordinate_frame = PositionTarget::FRAME_LOCAL_OFFSET_NED;
+	raw_target.coordinate_frame = PositionTarget::FRAME_LOCAL_NED;
 	raw_target.type_mask = PositionTarget::IGNORE_VX |
 						   PositionTarget::IGNORE_VY |
 						   PositionTarget::IGNORE_VZ |

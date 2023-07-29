@@ -104,7 +104,7 @@ int main(int argc, char **argv)
                 way_point::Waypoint current_waypoint = waypointManager.getCurrentWaypoint();
                 waypointManager.printCurrentWaypoint();
                 apm.setMoveSpeed(current_waypoint.air_speed); // 设置空速
-                apm.setPoseBody(current_waypoint.position.x,
+                apm.setPoseWorld(current_waypoint.position.x,
                                 current_waypoint.position.y,
                                 current_waypoint.position.z,
                                 current_waypoint.yaw);
