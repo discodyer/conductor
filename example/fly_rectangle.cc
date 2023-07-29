@@ -17,6 +17,7 @@
 #include "conductor/mission_state.h"
 #include "conductor/ansi_color.h"
 #include "conductor/apm.h"
+#include "conductor/way_point.h"
 
 #include "signal.h" //necessary for the Custom SIGINT handler
 #include "stdio.h"  //necessary for the Custom SIGINT handler
@@ -51,7 +52,11 @@ int main(int argc, char **argv)
 
     signal(SIGINT, safeSigintHandler);
 
+    std::string jsonFilePath = "./src/conductor/example/json/rectangle_waypoint.json";
+
     ArduConductor apm(nh);
+
+    WaypointManager waypointManager(jsonFilePath);
 
     // wait for FCU connection
     while (ros::ok() && !apm.current_state.connected && !is_interrupted)
@@ -73,7 +78,7 @@ int main(int argc, char **argv)
         case kPrearm:
             if (apm.setModeGuided(5.0)) // 修改飞行模式为 Guided (ArduCopter)
             {
-                apm.sendGpOrigin();    // 如果切换成Guided模式就发送全局原点坐标
+                apm.sendGpOrigin();     // 如果切换成Guided模式就发送全局原点坐标
                 apm.setMoveSpeed(0.15); // 设置空速
             }
             break;
@@ -86,57 +91,33 @@ int main(int argc, char **argv)
             if (apm.takeoff(0.5)) // 起飞到1M高度
             {
                 apm.mission_state = kPose;
+                ros::Duration(2.0).sleep();
                 ROS_INFO(MISSION_SWITCH_TO("pose"));
+                waypointManager.resetDelayTime();
             }
 
             break;
 
         case kPose:
-            if (apm.isTimeElapsed(2.0) && count == 0)
+            if (!waypointManager.is_current_waypoint_published_)
             {
-                apm.setPoseBody(0, 0, 0.6, 0);
-                ROS_INFO("takeoff to 1.0");
-                count ++;
+                way_point::Waypoint current_waypoint = waypointManager.getCurrentWaypoint();
+                waypointManager.printCurrentWaypoint();
+                apm.setMoveSpeed(current_waypoint.air_speed); // 设置空速
+                apm.setPoseBody(current_waypoint.position.x,
+                                current_waypoint.position.y,
+                                current_waypoint.position.z,
+                                current_waypoint.yaw);
+                waypointManager.is_current_waypoint_published_ = true;
             }
-            else if (apm.isTimeElapsed(5.0) && count == 1)
+
+            if (waypointManager.isWaypointDelaySatisfied())
             {
-                apm.setPoseBody(0.5, 0, 0, 0); // 前进0.5
-                count++;
-            }
-            else if (apm.isTimeElapsed(10.0) && count == 2)
-            {
-                apm.setPoseBody(0, 0.5, 0, 0); // 向左0.5
-                count++;
-            }
-            else if (apm.isTimeElapsed(15.0) && count == 3)
-            {
-                apm.setPoseBody(1.0, 0, 0, 0); // 向前1.0
-                count++;
-            }
-            else if (apm.isTimeElapsed(20.0) && count == 4)
-            {
-                apm.setPoseBody(0, -1.0, 0, 0); // 向右1.0
-                count++;
-            }
-            else if (apm.isTimeElapsed(25.0) && count == 5)
-            {
-                apm.setPoseBody(-1.0, 0, 0, 0); // 向后1.0
-                count++;
-            }
-            else if (apm.isTimeElapsed(30.0) && count == 6)
-            {
-                apm.setPoseBody(0, 0.5, 0, 0); // 向左0.5
-                count++;
-            }
-            else if (apm.isTimeElapsed(35.0) && count == 7)
-            {
-                apm.setPoseBody(-0.5, 0, 0, 0); // 向后0.5
-                count++;
-            }
-            else if (apm.isTimeElapsed(35.0))
-            {
-                apm.last_request = ros::Time::now();
-                apm.mission_state = kLand;
+                if (!waypointManager.goToNextWaypoint())
+                {
+                    apm.last_request = ros::Time::now();
+                    apm.mission_state = kLand;
+                }
             }
             break;
 

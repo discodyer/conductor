@@ -1,0 +1,100 @@
+{
+    "waypoints": [
+        {
+            "index": 0,
+            "type": "kPoseBody",
+            "position": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.6
+            },
+            "yaw": 0.0,
+            "delay": 3.0,
+            "air_speed": 0.2
+        },
+        {
+            "index": 1,
+            "type": "kPoseBody",
+            "position": {
+                "x": 0.5,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "yaw": 0.0,
+            "delay": 5.0,
+            "air_speed": 0.2
+        },
+        {
+            "index": 2,
+            "type": "kPoseBody",
+            "position": {
+                "x": 0.0,
+                "y": 0.5,
+                "z": 0.0
+            },
+            "yaw": 0.0,
+            "delay": 5.0,
+            "air_speed": 0.2
+        },
+        {
+            "index": 3,
+            "type": "kPoseBody",
+            "position": {
+                "x": 1.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "yaw": 0.0,
+            "delay": 5.0,
+            "air_speed": 0.2
+        },
+        {
+            "index": 4,
+            "type": "kPoseBody",
+            "position": {
+                "x": 0.0,
+                "y": -1.0,
+                "z": 0.0
+            },
+            "yaw": 0.0,
+            "delay": 5.0,
+            "air_speed": 0.2
+        },
+        {
+            "index": 5,
+            "type": "kPoseBody",
+            "position": {
+                "x": -1.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "yaw": 0.0,
+            "delay": 5.0,
+            "air_speed": 0.2
+        },
+        {
+            "index": 6,
+            "type": "kPoseBody",
+            "position": {
+                "x": 0.0,
+                "y": 0.5,
+                "z": 0.0
+            },
+            "yaw": 0.0,
+            "delay": 5.0,
+            "air_speed": 0.2
+        },
+        {
+            "index": 7,
+            "type": "kPoseBody",
+            "position": {
+                "x": -0.5,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "yaw": 0.0,
+            "delay": 5.0,
+            "air_speed": 0.2
+        }
+    ]
+}

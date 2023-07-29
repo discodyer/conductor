@@ -47,6 +47,8 @@ public:
 
     // 获取并转到下一个航点
     bool getNextWaypoint(way_point::Waypoint &waypoint);
+
+    void resetDelayTime();
     
     // 转到下一个航点
     bool goToNextWaypoint();
@@ -64,11 +66,12 @@ public:
     void printCurrentWaypoint() const;
     void printCurrentWaypointLoop();
 
+    bool is_current_waypoint_published_;
+
 private:
     std::vector<way_point::Waypoint> waypoints_;
     size_t current_waypoint_index_;
     ros::Time last_waypoint_time_;
-    bool is_current_waypoint_published_;
 };
 
 #endif // WAY_POINT_H

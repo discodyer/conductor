@@ -265,3 +265,8 @@ void WaypointManager::printCurrentWaypointLoop()
         ROS_INFO("No more waypoints to process.");
     }
 }
+
+void WaypointManager::resetDelayTime()
+{
+    last_waypoint_time_ = ros::Time::now();
+}
