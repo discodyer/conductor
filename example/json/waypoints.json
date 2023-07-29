@@ -13,18 +13,6 @@
             "air_speed": 5.0
         },
         {
-            "index": 1,
-            "type": "kPoseBody",
-            "position": {
-                "x": 1.0,
-                "y": 0.0,
-                "z": 0.5
-            },
-            "yaw": 90.0,
-            "delay": 3.0,
-            "air_speed": 3.0
-        },
-        {
             "index": 2,
             "type": "kSpecial",
             "position": {
@@ -35,6 +23,18 @@
             "yaw": 180.0,
             "delay": 0.0,
             "air_speed": 2.0
+        },
+        {
+            "index": 1,
+            "type": "kPoseBody",
+            "position": {
+                "x": 1.0,
+                "y": 0.0,
+                "z": 0.5
+            },
+            "yaw": 90.0,
+            "delay": 3.0,
+            "air_speed": 3.0
         }
     ]
 }

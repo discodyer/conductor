@@ -4,7 +4,7 @@
 #include "conductor/ansi_color.h"
 
 WaypointManager::WaypointManager(const std::string &jsonFilePath)
-: current_waypoint_index_(0), last_waypoint_time_(ros::Time::now())
+    : current_waypoint_index_(0), last_waypoint_time_(ros::Time::now())
 {
     // 打开 JSON 文件
     std::ifstream ifs(jsonFilePath);
@@ -30,6 +30,7 @@ WaypointManager::WaypointManager(const std::string &jsonFilePath)
     }
 
     // 获取 waypoints 数组
+    std::vector<way_point::Waypoint> tempWaypoints; // 临时容器，用于暂存读取到的航点数据
     const rapidjson::Value &waypointsArray = document["waypoints"];
     for (rapidjson::SizeType i = 0; i < waypointsArray.Size(); i++)
     {
@@ -41,7 +42,7 @@ WaypointManager::WaypointManager(const std::string &jsonFilePath)
         }
 
         // 解析航点数据
-        way_point::Waypoint waypoint;
+        way_point::Waypoint waypoint{i, way_point::WaypointType::kPoseWorld, {0, 0, 0}, 0, 0, 0};
         if (waypointData.HasMember("type") && waypointData["type"].IsString())
         {
             const std::string &typeStr = waypointData["type"].GetString();
@@ -131,8 +132,15 @@ WaypointManager::WaypointManager(const std::string &jsonFilePath)
             continue;
         }
 
-        waypoints_.push_back(waypoint);
+        tempWaypoints.push_back(waypoint);
     }
+    // 对航点数据按照索引进行排序
+    std::sort(tempWaypoints.begin(), tempWaypoints.end(),
+              [](const way_point::Waypoint &a, const way_point::Waypoint &b)
+              { return a.index < b.index; });
+
+    // 将排序后的航点数据存储到 waypoints 容器中
+    waypoints_ = std::move(tempWaypoints);
 
     ROS_INFO(SUCCESS("Loaded %zu waypoints from JSON file."), waypoints_.size());
 }
@@ -141,8 +149,7 @@ bool WaypointManager::getNextWaypoint(way_point::Waypoint &waypoint)
 {
     if (current_waypoint_index_ < waypoints_.size())
     {
-        waypoint = waypoints_[current_waypoint_index_];
-        current_waypoint_index_++;
+        waypoint = waypoints_[++current_waypoint_index_];
         return true;
     }
     return false;
@@ -170,9 +177,11 @@ way_point::WaypointType WaypointManager::getCurrentWaypointType() const
     return way_point::WaypointType::kPoseWorld;
 }
 
-void WaypointManager::printCurrentWaypoint() const {
-    if (current_waypoint_index_ < waypoints_.size()) {
-        const way_point::Waypoint& waypoint = waypoints_[current_waypoint_index_];
+void WaypointManager::printCurrentWaypoint() const
+{
+    if (current_waypoint_index_ < waypoints_.size())
+    {
+        const way_point::Waypoint &waypoint = waypoints_[current_waypoint_index_];
         ROS_INFO("Current Waypoint Information:");
         ROS_INFO("Index: %zu", waypoint.index);
         ROS_INFO("Type: %d", static_cast<int>(waypoint.type));
@@ -181,7 +190,9 @@ void WaypointManager::printCurrentWaypoint() const {
         ROS_INFO("Delay: %f", waypoint.delay);
         ROS_INFO("Air Speed: %f", waypoint.air_speed);
         ROS_INFO(COLORED_TEXT("-----------------------------", "\033[1m"));
-    } else {
+    }
+    else
+    {
         ROS_INFO("No more waypoints to process.");
     }
 }
