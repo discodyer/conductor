@@ -197,6 +197,12 @@ add_executable(read_waypoints_json test/read_waypoints_json.cc)
 add_dependencies(read_waypoints_json ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(read_waypoints_json conductor ${catkin_LIBRARIES})
 
+# 21年国赛
+add_executable(zhibao src/zhibao.cc)
+add_dependencies(zhibao ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(zhibao conductor ${catkin_LIBRARIES})
+
+
 # add_dependencies(test beginner_tutorials_generate_messages_cpp)
 
 ## Rename C++ executable without prefix
