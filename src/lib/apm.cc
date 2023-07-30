@@ -21,7 +21,7 @@ ArduConductor::ArduConductor(ros::NodeHandle &nodehandle, double rate)
 /// @brief 设置全局坐标原点
 /// @param latitude 纬度
 /// @param longitude 经度
-void ArduConductor::sendGpOrigin(double latitude, double longitude)
+void ArduConductor::sendGpOrigin(double latitude, double longitude) const
 {
 	geographic_msgs::GeoPointStamped gp_origin;
 	gp_origin.position.latitude = latitude;
@@ -138,9 +138,30 @@ void ArduConductor::setPoseBody(double x, double y, double z, double yaw)
 	set_raw_pub_.publish(raw_target);
 }
 
+/// @brief 悬停
+void ArduConductor::setBreak()
+{
+	setPoseBody(0, 0, 0, 0);
+}
+
+void ArduConductor::initNode()
+{
+	set_gp_origin_pub_ = nh_.advertise<geographic_msgs::GeoPointStamped>("mavros/global_position/set_gp_origin", 10);
+}
+
+void ArduConductor::setPoseRelated(double x, double y, double z, double yaw)
+{
+}
+
 void ArduConductor::setPoseWorld(double x, double y, double z, double yaw)
 {
+	sendTranslatedPoseWorld(x, y, z, yaw);
+}
+
+void ArduConductor::sendTranslatedPoseWorld(double x, double y, double z, double yaw) const
+{
 	using namespace mavros_msgs;
+	double gamma_world = -1.5707963;
 	mavros_msgs::PositionTarget raw_target;
 	raw_target.coordinate_frame = PositionTarget::FRAME_LOCAL_NED;
 	raw_target.type_mask = PositionTarget::IGNORE_VX |
@@ -150,34 +171,9 @@ void ArduConductor::setPoseWorld(double x, double y, double z, double yaw)
 						   PositionTarget::IGNORE_AFY |
 						   PositionTarget::IGNORE_AFZ |
 						   PositionTarget::IGNORE_YAW_RATE;
-	raw_target.position.x = x;
-	raw_target.position.y = y;
+	raw_target.position.x = -y;
+	raw_target.position.y = x;
 	raw_target.position.z = z;
-	raw_target.yaw = yaw;
+	raw_target.yaw = yaw - gamma_world;
 	set_raw_pub_.publish(raw_target);
-}
-
-/// @brief 悬停
-void ArduConductor::setBreak()
-{
-	using namespace mavros_msgs;
-	mavros_msgs::PositionTarget raw_target;
-	raw_target.coordinate_frame = PositionTarget::FRAME_BODY_OFFSET_NED;
-	raw_target.type_mask = PositionTarget::IGNORE_VX |
-						   PositionTarget::IGNORE_VY |
-						   PositionTarget::IGNORE_VZ |
-						   PositionTarget::IGNORE_AFX |
-						   PositionTarget::IGNORE_AFY |
-						   PositionTarget::IGNORE_AFZ |
-						   PositionTarget::IGNORE_YAW_RATE;
-	raw_target.position.x = 0;
-	raw_target.position.y = 0;
-	raw_target.position.z = 0;
-	raw_target.yaw = 0;
-	set_raw_pub_.publish(raw_target);
-}
-
-void ArduConductor::initNode()
-{
-	set_gp_origin_pub_ = nh_.advertise<geographic_msgs::GeoPointStamped>("mavros/global_position/set_gp_origin", 10);
 }
