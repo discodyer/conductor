@@ -493,14 +493,12 @@ void FrameManager::publishFrameAll()
 
 void FrameManager::printFrameInfo(const waypoint::FrameTransform &frame) const
 {
-    double yaw, pitch, roll;
-    tf2::Matrix3x3(frame.rotation).getEulerYPR(yaw, pitch, roll);
     ROS_INFO("Frame info:");
     ROS_INFO("%s <-- %s", frame.target_frame_id.c_str(), frame.source_frame_id.c_str());
     ROS_INFO("x: %f", frame.translation.getX());
     ROS_INFO("y: %f", frame.translation.getY());
     ROS_INFO("z: %f", frame.translation.getZ());
-    ROS_INFO("yaw: %f", yaw);
+    ROS_INFO("yaw: %f", frame.getYaw());
     ROS_INFO("------------------------");
 }
 
@@ -510,4 +508,37 @@ void FrameManager::printFrameInfoALL() const
     {
         printFrameInfo(frame);
     }
+}
+
+std::string FrameManager::getWorldFrameID() const
+{
+    if (!frameTransforms_.empty())
+    {
+        // 获取第一个 frameTransform 的 target_frame_id
+        return frameTransforms_[0].target_frame_id;
+    }
+    return std::string("");
+}
+
+tf2::Transform FrameManager::getTransform(const std::string &target_frame_id, const std::string &source_frame_id)
+{
+    geometry_msgs::TransformStamped transform_stamped = tf_buffer_.lookupTransform(target_frame_id, source_frame_id, ros::Time(0), ros::Duration(1.0));
+    tf2::Transform transform;
+    tf2::fromMsg(transform_stamped.transform, transform);
+    return transform;
+}
+
+waypoint::Waypoint FrameManager::getWorldWaypoint(waypoint::Waypoint waypoint, const std::string &world_frame_id)
+{
+    waypoint::Waypoint waypoint_world{0, waypoint::WaypointType::kPoseAbsolute, "world", {0, 0, 0}, 0, waypoint.delay, waypoint.air_speed};
+    tf2::Transform transform_to_world = getTransform("world", waypoint.frame_id);
+    tf2::Vector3 position_orig = transform_to_world.getOrigin();
+    waypoint_world.position.x = waypoint.position.x + position_orig.getX();
+    waypoint_world.position.y = waypoint.position.y + position_orig.getY();
+    waypoint_world.position.z = waypoint.position.z + position_orig.getZ();
+    tf2::Matrix3x3 mat(transform_to_world.getRotation());
+    double rotation_yaw, rotation_pitch, rotation_roll;
+    mat.getEulerYPR(rotation_yaw, rotation_pitch, rotation_roll);
+    waypoint_world.yaw = waypoint.yaw + rotation_yaw;
+    return waypoint_world;
 }

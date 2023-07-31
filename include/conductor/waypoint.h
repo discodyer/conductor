@@ -41,6 +41,27 @@ namespace waypoint
         std::string target_frame_id; // 父坐标系
         tf2::Vector3 translation;    // 位置变换
         tf2::Quaternion rotation;    // 方向变换
+        double getYaw() const
+        {
+            tf2::Matrix3x3 mat(rotation);
+            double yaw, pitch, roll;
+            mat.getEulerYPR(yaw, pitch, roll);
+            return yaw;
+        };
+        double getPitch() const
+        {
+            tf2::Matrix3x3 mat(rotation);
+            double yaw, pitch, roll;
+            mat.getEulerYPR(yaw, pitch, roll);
+            return pitch;
+        };
+        double getRoll() const
+        {
+            tf2::Matrix3x3 mat(rotation);
+            double yaw, pitch, roll;
+            mat.getEulerYPR(yaw, pitch, roll);
+            return roll;
+        };
     };
 
     // 航点结构体
@@ -99,6 +120,8 @@ public:
 
     // 判断世界坐标系是否准备完毕
     bool isWorldFrameExist() const;
+
+    std::string getWorldFrameID() const;
     
     // 判断是否存在坐标系
     bool isFrameExist(const std::string &target_frame_id) const;
@@ -112,6 +135,9 @@ public:
 
     void printFrameInfo(const waypoint::FrameTransform &frame) const;
     void printFrameInfoALL() const;
+
+    tf2::Transform getTransform(const std::string &target_frame_id, const std::string &source_frame_id);
+    waypoint::Waypoint getWorldWaypoint(waypoint::Waypoint waypoint, const std::string &world_frame_id = "world");
 
 private:
     // 静态坐标转换广播器
