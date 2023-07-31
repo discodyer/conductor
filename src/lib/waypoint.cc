@@ -233,6 +233,28 @@ waypoint::WaypointType WaypointManager::getCurrentWaypointType() const
     return waypoint::WaypointType::kPoseAbsolute;
 }
 
+std::string WaypointManager::getTypeString(waypoint::WaypointType type) const
+{
+    switch (type)
+    {
+    case waypoint::WaypointType::kPoseAbsolute:
+        return std::string("PoseAbsolute");
+        break;
+
+    case waypoint::WaypointType::kPoseRelated:
+        return std::string("PoseRelated");
+        break;
+
+    case waypoint::WaypointType::kSpecial:
+        return std::string("Special");
+        break;
+
+    default:
+        return std::string("Unknow");
+        break;
+    }
+}
+
 void WaypointManager::printCurrentWaypoint() const
 {
     if (current_waypoint_index_ < waypoints_.size())
@@ -240,7 +262,8 @@ void WaypointManager::printCurrentWaypoint() const
         const waypoint::Waypoint &waypoint = waypoints_[current_waypoint_index_];
         ROS_INFO("Current Waypoint Information:");
         ROS_INFO("Index: %zu", waypoint.index);
-        ROS_INFO("Type: %d", static_cast<int>(waypoint.type));
+        ROS_INFO("Type: %s", getTypeString(waypoint.type).c_str());
+        ROS_INFO("frame_id: %s", waypoint.frame_id.c_str());
         ROS_INFO("Position: x= %f, y= %f, z= %f", waypoint.position.x, waypoint.position.y, waypoint.position.z);
         ROS_INFO("Yaw: %f", waypoint.yaw);
         ROS_INFO("Delay: %f", waypoint.delay);
@@ -262,7 +285,8 @@ void WaypointManager::printCurrentWaypointLoop()
             const waypoint::Waypoint &waypoint = waypoints_[current_waypoint_index_];
             ROS_INFO("Current Waypoint Information:");
             ROS_INFO("Index: %zu", waypoint.index);
-            ROS_INFO("Type: %d", static_cast<int>(waypoint.type));
+            ROS_INFO("Type: %s", getTypeString(waypoint.type).c_str());
+            ROS_INFO("frame_id: %s", waypoint.frame_id.c_str());
             ROS_INFO("Position: x= %f, y= %f, z= %f", waypoint.position.x, waypoint.position.y, waypoint.position.z);
             ROS_INFO("Yaw: %f", waypoint.yaw);
             ROS_INFO("Delay: %f", waypoint.delay);
@@ -442,20 +466,13 @@ void FrameManager::publishFrame(const waypoint::FrameTransform &frame)
     transform_stamped.transform.rotation.w = frame.rotation.getW();
     static_tf_broadcaster_.sendTransform(transform_stamped);
 
-    double yaw, pitch, roll;
-    tf2::Matrix3x3(frame.rotation).getEulerYPR(yaw, pitch, roll);
     ROS_INFO("Published new Transform:");
-    ROS_INFO("%s <-- %s", frame.target_frame_id.c_str(), frame.source_frame_id.c_str());
-    ROS_INFO("x: %f", frame.translation.getX());
-    ROS_INFO("y: %f", frame.translation.getY());
-    ROS_INFO("z: %f", frame.translation.getZ());
-    ROS_INFO("yaw: %f", yaw);
-    ROS_INFO("------------------------");
+    printFrameInfo(frame);
 }
 
 void FrameManager::publishFrameAll()
 {
-    for(const auto& frame : frameTransforms_)
+    for (const auto &frame : frameTransforms_)
     {
         // 使用 static_tf_broadcaster_ 发布坐标关系
         geometry_msgs::TransformStamped transform_stamped;
@@ -471,5 +488,26 @@ void FrameManager::publishFrameAll()
         transform_stamped.transform.rotation.w = frame.rotation.w();
 
         static_tf_broadcaster_.sendTransform(transform_stamped);
+    }
+}
+
+void FrameManager::printFrameInfo(const waypoint::FrameTransform &frame) const
+{
+    double yaw, pitch, roll;
+    tf2::Matrix3x3(frame.rotation).getEulerYPR(yaw, pitch, roll);
+    ROS_INFO("Frame info:");
+    ROS_INFO("%s <-- %s", frame.target_frame_id.c_str(), frame.source_frame_id.c_str());
+    ROS_INFO("x: %f", frame.translation.getX());
+    ROS_INFO("y: %f", frame.translation.getY());
+    ROS_INFO("z: %f", frame.translation.getZ());
+    ROS_INFO("yaw: %f", yaw);
+    ROS_INFO("------------------------");
+}
+
+void FrameManager::printFrameInfoALL() const
+{
+    for (const auto &frame : frameTransforms_)
+    {
+        printFrameInfo(frame);
     }
 }

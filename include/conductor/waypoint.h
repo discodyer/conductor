@@ -84,6 +84,8 @@ public:
 
     bool is_current_waypoint_published_;
 
+    std::string getTypeString(waypoint::WaypointType type) const;
+
 private:
     std::vector<waypoint::Waypoint> waypoints_;
     size_t current_waypoint_index_;
@@ -107,6 +109,9 @@ public:
     void publishFrame(const waypoint::FrameTransform &frame);
 
     void publishFrameAll();
+
+    void printFrameInfo(const waypoint::FrameTransform &frame) const;
+    void printFrameInfoALL() const;
 
 private:
     // 静态坐标转换广播器

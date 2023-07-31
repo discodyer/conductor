@@ -2,7 +2,7 @@
     "waypoints": [
         {
             "index": 0,
-            "type": "kPoseAbsolute",
+            "type": "PoseAbsolute",
             "frame_id": "camera_init",
             "position": {
                 "x": 10.0,
@@ -15,7 +15,7 @@
         },
         {
             "index": 2,
-            "type": "kSpecial",
+            "type": "Special",
             "frame_id": "body_offset",
             "position": {
                 "x": -5.0,
@@ -28,7 +28,7 @@
         },
         {
             "index": 1,
-            "type": "kPoseRelated",
+            "type": "PoseRelated",
             "frame_id": "body_offset",
             "position": {
                 "x": 1.0,
