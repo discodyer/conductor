@@ -19,8 +19,8 @@ namespace waypoint
     // 航点类型枚举型
     enum class WaypointType
     {
-        kPoseWorld, // 全局坐标航点
-        kPoseBody,  // 相对坐标航点
+        kPoseAbsolute, // 全局坐标航点
+        kPoseRelated,  // 相对坐标航点
         kSpecial,   // 特殊航点，需要执行子状态机任务
     };
 
@@ -105,6 +105,8 @@ public:
 
     // 发布坐标关系
     void publishFrame(const waypoint::FrameTransform &frame);
+
+    void publishFrameAll();
 
 private:
     // 静态坐标转换广播器

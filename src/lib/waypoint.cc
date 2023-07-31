@@ -42,19 +42,19 @@ WaypointManager::WaypointManager(const std::string &jsonFilePath)
         }
 
         // 解析航点数据
-        waypoint::Waypoint waypoint{i, waypoint::WaypointType::kPoseWorld, {0, 0, 0}, 0, 0, 0};
+        waypoint::Waypoint waypoint{i, waypoint::WaypointType::kPoseAbsolute, "camera_init", {0, 0, 0}, 0, 0, 0};
         if (waypointData.HasMember("type") && waypointData["type"].IsString())
         {
             const std::string &typeStr = waypointData["type"].GetString();
-            if (typeStr == "kPoseWorld")
+            if (typeStr == "PoseAbsolute")
             {
-                waypoint.type = waypoint::WaypointType::kPoseWorld;
+                waypoint.type = waypoint::WaypointType::kPoseAbsolute;
             }
-            else if (typeStr == "kPoseBody")
+            else if (typeStr == "PoseRelated")
             {
-                waypoint.type = waypoint::WaypointType::kPoseBody;
+                waypoint.type = waypoint::WaypointType::kPoseRelated;
             }
-            else if (typeStr == "kSpecial")
+            else if (typeStr == "Special")
             {
                 waypoint.type = waypoint::WaypointType::kSpecial;
             }
@@ -67,6 +67,17 @@ WaypointManager::WaypointManager(const std::string &jsonFilePath)
         else
         {
             ROS_ERROR("Waypoint type not found or not a string.");
+            continue;
+        }
+
+        if (waypointData.HasMember("frame_id") && waypointData["frame_id"].IsString())
+        {
+            const std::string &typeStr = waypointData["frame_id"].GetString();
+            waypoint.frame_id = typeStr;
+        }
+        else
+        {
+            ROS_ERROR("frame_id not found or not a string.");
             continue;
         }
 
@@ -190,7 +201,7 @@ waypoint::Waypoint WaypointManager::getCurrentWaypoint() const
     // 如果当前航点索引无效，返回一个默认的空航点
     waypoint::Waypoint emptyWaypoint;
     emptyWaypoint.index = 0;
-    emptyWaypoint.type = waypoint::WaypointType::kPoseWorld;
+    emptyWaypoint.type = waypoint::WaypointType::kPoseAbsolute;
     emptyWaypoint.position.x = 0.0;
     emptyWaypoint.position.y = 0.0;
     emptyWaypoint.position.z = 0.0;
@@ -218,8 +229,8 @@ waypoint::WaypointType WaypointManager::getCurrentWaypointType() const
     {
         return waypoints_[current_waypoint_index_].type;
     }
-    // 如果当前航点索引无效，返回默认类型 kPoseWorld
-    return waypoint::WaypointType::kPoseWorld;
+    // 如果当前航点索引无效，返回默认类型 kPoseAbsolute
+    return waypoint::WaypointType::kPoseAbsolute;
 }
 
 void WaypointManager::printCurrentWaypoint() const
@@ -430,7 +441,35 @@ void FrameManager::publishFrame(const waypoint::FrameTransform &frame)
     transform_stamped.transform.rotation.z = frame.rotation.getZ();
     transform_stamped.transform.rotation.w = frame.rotation.getW();
     static_tf_broadcaster_.sendTransform(transform_stamped);
+
+    double yaw, pitch, roll;
+    tf2::Matrix3x3(frame.rotation).getEulerYPR(yaw, pitch, roll);
     ROS_INFO("Published new Transform:");
     ROS_INFO("%s <-- %s", frame.target_frame_id.c_str(), frame.source_frame_id.c_str());
+    ROS_INFO("x: %f", frame.translation.getX());
+    ROS_INFO("y: %f", frame.translation.getY());
+    ROS_INFO("z: %f", frame.translation.getZ());
+    ROS_INFO("yaw: %f", yaw);
     ROS_INFO("------------------------");
+}
+
+void FrameManager::publishFrameAll()
+{
+    for(const auto& frame : frameTransforms_)
+    {
+        // 使用 static_tf_broadcaster_ 发布坐标关系
+        geometry_msgs::TransformStamped transform_stamped;
+        transform_stamped.header.stamp = ros::Time::now();
+        transform_stamped.header.frame_id = frame.target_frame_id;
+        transform_stamped.child_frame_id = frame.source_frame_id;
+        transform_stamped.transform.translation.x = frame.translation.x();
+        transform_stamped.transform.translation.y = frame.translation.y();
+        transform_stamped.transform.translation.z = frame.translation.z();
+        transform_stamped.transform.rotation.x = frame.rotation.x();
+        transform_stamped.transform.rotation.y = frame.rotation.y();
+        transform_stamped.transform.rotation.z = frame.rotation.z();
+        transform_stamped.transform.rotation.w = frame.rotation.w();
+
+        static_tf_broadcaster_.sendTransform(transform_stamped);
+    }
 }

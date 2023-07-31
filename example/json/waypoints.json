@@ -2,7 +2,8 @@
     "waypoints": [
         {
             "index": 0,
-            "type": "kPoseWorld",
+            "type": "kPoseAbsolute",
+            "frame_id": "camera_init",
             "position": {
                 "x": 10.0,
                 "y": 20.0,
@@ -15,6 +16,7 @@
         {
             "index": 2,
             "type": "kSpecial",
+            "frame_id": "body_offset",
             "position": {
                 "x": -5.0,
                 "y": -10.0,
@@ -26,7 +28,8 @@
         },
         {
             "index": 1,
-            "type": "kPoseBody",
+            "type": "kPoseRelated",
+            "frame_id": "body_offset",
             "position": {
                 "x": 1.0,
                 "y": 0.0,

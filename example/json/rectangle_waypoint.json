@@ -2,7 +2,8 @@
     "waypoints": [
         {
             "index": 0,
-            "type": "kPoseWorld",
+            "type": "kPoseAbsolute",
+            "frame_id": "camera_init",
             "position": {
                 "x": 0.0,
                 "y": 0.0,
@@ -14,7 +15,8 @@
         },
         {
             "index": 1,
-            "type": "kPoseWorld",
+            "type": "kPoseAbsolute",
+            "frame_id": "camera_init",
             "position": {
                 "x": 0.5,
                 "y": 0.0,
@@ -26,7 +28,8 @@
         },
         {
             "index": 2,
-            "type": "kPoseWorld",
+            "type": "kPoseAbsolute",
+            "frame_id": "camera_init",
             "position": {
                 "x": 0.5,
                 "y": 0.5,
@@ -38,7 +41,8 @@
         },
         {
             "index": 3,
-            "type": "kPoseWorld",
+            "type": "kPoseAbsolute",
+            "frame_id": "camera_init",
             "position": {
                 "x": 1.5,
                 "y": 0.5,
@@ -50,7 +54,8 @@
         },
         {
             "index": 4,
-            "type": "kPoseWorld",
+            "type": "kPoseAbsolute",
+            "frame_id": "camera_init",
             "position": {
                 "x": 1.5,
                 "y": -0.5,
@@ -62,7 +67,8 @@
         },
         {
             "index": 5,
-            "type": "kPoseWorld",
+            "type": "kPoseAbsolute",
+            "frame_id": "camera_init",
             "position": {
                 "x": 0.5,
                 "y": -0.5,
@@ -74,7 +80,8 @@
         },
         {
             "index": 6,
-            "type": "kPoseWorld",
+            "type": "kPoseAbsolute",
+            "frame_id": "camera_init",
             "position": {
                 "x": 0.5,
                 "y": 0.0,
@@ -86,7 +93,8 @@
         },
         {
             "index": 7,
-            "type": "kPoseWorld",
+            "type": "kPoseAbsolute",
+            "frame_id": "camera_init",
             "position": {
                 "x": 0.0,
                 "y": 0.0,
@@ -98,7 +106,8 @@
         },
         {
             "index": 8,
-            "type": "kPoseWorld",
+            "type": "kPoseAbsolute",
+            "frame_id": "camera_init",
             "position": {
                 "x": 0.0,
                 "y": 0.0,
