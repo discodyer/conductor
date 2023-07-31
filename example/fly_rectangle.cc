@@ -90,8 +90,8 @@ int main(int argc, char **argv)
         case kTakeoff:
             if (apm.takeoff(0.5)) // 起飞到1M高度
             {
-                apm.mission_state = kPose;
                 ros::Duration(2.0).sleep();
+                apm.mission_state = kPose;
                 ROS_INFO(MISSION_SWITCH_TO("pose"));
                 waypointManager.resetDelayTime();
             }

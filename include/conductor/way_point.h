@@ -27,6 +27,15 @@ namespace way_point
     };
     typedef Vector3_<double> Position;
 
+    // 坐标变换关系结构体
+    struct FrameTransform
+    {
+        std::string from_frame; // 起始坐标系
+        std::string to_frame;   // 目标坐标系
+        Position translation;   // 平移向量
+        Quaternion orientation; // 四元数表示的旋转
+    };
+
     // 航点结构体
     struct Waypoint
     {
