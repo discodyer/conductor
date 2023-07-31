@@ -1,7 +1,7 @@
 #include <ros/ros.h>
 #include "rapidjson/document.h"
 #include "rapidjson/filereadstream.h"
-#include "conductor/way_point.h" // 假设 WaypointManager 类的头文件在这里包含
+#include "conductor/waypoint.h" // 假设 WaypointManager 类的头文件在这里包含
 
 int main(int argc, char **argv)
 {

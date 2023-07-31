@@ -1,7 +1,7 @@
 #ifndef APM_H
 #define APM_H
 #include "conductor/base.h"
-#include "conductor/way_point.h"
+#include "conductor/waypoint.h"
 #include <tf2_ros/transform_broadcaster.h>
 
 class ArduConductor : public BaseConductor
@@ -20,9 +20,8 @@ public:
     void setAngularRate(double yaw_rate);
     void setPoseBody(double x, double y, double z, double yaw);
     void setPoseRelated(double x, double y, double z, double yaw);
-    void setPoseWorld(double x, double y, double z, double yaw);
+    void setPoseWorld(double x, double y, double z, double yaw) const;
     void sendTranslatedPoseWorld(double x, double y, double z, double yaw) const;
-    void broadcastPoseFrame();
     void setBreak();
 
     ~ArduConductor(){};

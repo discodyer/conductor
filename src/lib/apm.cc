@@ -153,7 +153,7 @@ void ArduConductor::setPoseRelated(double x, double y, double z, double yaw)
 {
 }
 
-void ArduConductor::setPoseWorld(double x, double y, double z, double yaw)
+void ArduConductor::setPoseWorld(double x, double y, double z, double yaw) const
 {
 	sendTranslatedPoseWorld(x, y, z, yaw);
 }

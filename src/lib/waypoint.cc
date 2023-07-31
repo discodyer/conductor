@@ -1,4 +1,4 @@
-#include "conductor/way_point.h"
+#include "conductor/waypoint.h"
 #include <ros/ros.h>
 #include <rapidjson/document.h>
 #include "conductor/ansi_color.h"
@@ -30,7 +30,7 @@ WaypointManager::WaypointManager(const std::string &jsonFilePath)
     }
 
     // 获取 waypoints 数组
-    std::vector<way_point::Waypoint> tempWaypoints; // 临时容器，用于暂存读取到的航点数据
+    std::vector<waypoint::Waypoint> tempWaypoints; // 临时容器，用于暂存读取到的航点数据
     const rapidjson::Value &waypointsArray = document["waypoints"];
     for (rapidjson::SizeType i = 0; i < waypointsArray.Size(); i++)
     {
@@ -42,21 +42,21 @@ WaypointManager::WaypointManager(const std::string &jsonFilePath)
         }
 
         // 解析航点数据
-        way_point::Waypoint waypoint{i, way_point::WaypointType::kPoseWorld, {0, 0, 0}, 0, 0, 0};
+        waypoint::Waypoint waypoint{i, waypoint::WaypointType::kPoseWorld, {0, 0, 0}, 0, 0, 0};
         if (waypointData.HasMember("type") && waypointData["type"].IsString())
         {
             const std::string &typeStr = waypointData["type"].GetString();
             if (typeStr == "kPoseWorld")
             {
-                waypoint.type = way_point::WaypointType::kPoseWorld;
+                waypoint.type = waypoint::WaypointType::kPoseWorld;
             }
             else if (typeStr == "kPoseBody")
             {
-                waypoint.type = way_point::WaypointType::kPoseBody;
+                waypoint.type = waypoint::WaypointType::kPoseBody;
             }
             else if (typeStr == "kSpecial")
             {
-                waypoint.type = way_point::WaypointType::kSpecial;
+                waypoint.type = waypoint::WaypointType::kSpecial;
             }
             else
             {
@@ -136,7 +136,7 @@ WaypointManager::WaypointManager(const std::string &jsonFilePath)
     }
     // 对航点数据按照索引进行排序
     std::sort(tempWaypoints.begin(), tempWaypoints.end(),
-              [](const way_point::Waypoint &a, const way_point::Waypoint &b)
+              [](const waypoint::Waypoint &a, const waypoint::Waypoint &b)
               { return a.index < b.index; });
 
     // 将排序后的航点数据存储到 waypoints 容器中
@@ -145,7 +145,7 @@ WaypointManager::WaypointManager(const std::string &jsonFilePath)
     ROS_INFO(SUCCESS("Loaded %zu waypoints from JSON file."), waypoints_.size());
 }
 
-bool WaypointManager::getNextWaypoint(way_point::Waypoint &waypoint)
+bool WaypointManager::getNextWaypoint(waypoint::Waypoint &waypoint)
 {
     if (current_waypoint_index_ < waypoints_.size() - 1)
     {
@@ -181,16 +181,16 @@ bool WaypointManager::goToNextWaypoint()
     return false;
 }
 
-way_point::Waypoint WaypointManager::getCurrentWaypoint() const
+waypoint::Waypoint WaypointManager::getCurrentWaypoint() const
 {
     if (current_waypoint_index_ < waypoints_.size())
     {
         return waypoints_[current_waypoint_index_];
     }
     // 如果当前航点索引无效，返回一个默认的空航点
-    way_point::Waypoint emptyWaypoint;
+    waypoint::Waypoint emptyWaypoint;
     emptyWaypoint.index = 0;
-    emptyWaypoint.type = way_point::WaypointType::kPoseWorld;
+    emptyWaypoint.type = waypoint::WaypointType::kPoseWorld;
     emptyWaypoint.position.x = 0.0;
     emptyWaypoint.position.y = 0.0;
     emptyWaypoint.position.z = 0.0;
@@ -212,21 +212,21 @@ bool WaypointManager::isWaypointDelaySatisfied() const
     return false;
 }
 
-way_point::WaypointType WaypointManager::getCurrentWaypointType() const
+waypoint::WaypointType WaypointManager::getCurrentWaypointType() const
 {
     if (current_waypoint_index_ < waypoints_.size())
     {
         return waypoints_[current_waypoint_index_].type;
     }
     // 如果当前航点索引无效，返回默认类型 kPoseWorld
-    return way_point::WaypointType::kPoseWorld;
+    return waypoint::WaypointType::kPoseWorld;
 }
 
 void WaypointManager::printCurrentWaypoint() const
 {
     if (current_waypoint_index_ < waypoints_.size())
     {
-        const way_point::Waypoint &waypoint = waypoints_[current_waypoint_index_];
+        const waypoint::Waypoint &waypoint = waypoints_[current_waypoint_index_];
         ROS_INFO("Current Waypoint Information:");
         ROS_INFO("Index: %zu", waypoint.index);
         ROS_INFO("Type: %d", static_cast<int>(waypoint.type));
@@ -248,7 +248,7 @@ void WaypointManager::printCurrentWaypointLoop()
     {
         if (!is_current_waypoint_published_)
         {
-            const way_point::Waypoint &waypoint = waypoints_[current_waypoint_index_];
+            const waypoint::Waypoint &waypoint = waypoints_[current_waypoint_index_];
             ROS_INFO("Current Waypoint Information:");
             ROS_INFO("Index: %zu", waypoint.index);
             ROS_INFO("Type: %d", static_cast<int>(waypoint.type));
@@ -269,4 +269,168 @@ void WaypointManager::printCurrentWaypointLoop()
 void WaypointManager::resetDelayTime()
 {
     last_waypoint_time_ = ros::Time::now();
+}
+
+FrameManager::FrameManager(const std::string &jsonFilePath)
+    : static_tf_broadcaster_(),
+      tf_buffer_(),
+      tf_listener_(tf_buffer_)
+{
+    std::vector<waypoint::FrameTransform> frameTransforms; // 临时容器
+
+    // 打开 JSON 文件
+    std::ifstream ifs(jsonFilePath);
+    if (!ifs.is_open())
+    {
+        // 错误处理，文件打开失败
+        ROS_ERROR("Failed to open JSON file: %s", jsonFilePath.c_str());
+        return;
+    }
+
+    // 读取 JSON 数据到字符串
+    std::string jsonString((std::istreambuf_iterator<char>(ifs)), std::istreambuf_iterator<char>());
+    ifs.close();
+
+    // 解析 JSON 数据
+    rapidjson::Document document;
+    document.Parse(jsonString.c_str());
+
+    // 检查解析是否成功，并获取 transforms 数组
+    if (!document.IsObject() || !document.HasMember("transforms") || !document["transforms"].IsArray())
+    {
+        // 错误处理，JSON 格式无效或者缺少 transforms 数组
+        ROS_ERROR("Invalid JSON format.");
+        return;
+    }
+
+    // 获取 transforms 数组
+    const rapidjson::Value &transformsArray = document["transforms"];
+    for (rapidjson::SizeType i = 0; i < transformsArray.Size(); i++)
+    {
+        const rapidjson::Value &transformData = transformsArray[i];
+        if (!transformData.IsObject())
+        {
+            // 错误处理，transformData 不是对象
+            ROS_ERROR("Invalid transform data.");
+            continue;
+        }
+
+        // 解析坐标变换关系数据
+        waypoint::FrameTransform frameTransform{};
+
+        // 解析 source_frame_id 和 target_frame_id
+        if (transformData.HasMember("source_frame_id") && transformData["source_frame_id"].IsString())
+        {
+            frameTransform.source_frame_id = transformData["source_frame_id"].GetString();
+        }
+        else
+        {
+            // 错误处理，source_frame_id 数据无效
+            ROS_ERROR("source_frame_id not found or not a string.");
+            continue;
+        }
+
+        if (transformData.HasMember("target_frame_id") && transformData["target_frame_id"].IsString())
+        {
+            frameTransform.target_frame_id = transformData["target_frame_id"].GetString();
+        }
+        else
+        {
+            // 错误处理，target_frame_id 数据无效
+            ROS_ERROR("target_frame_id not found or not a string.");
+            continue;
+        }
+
+        // 解析 translation 数据
+        if (transformData.HasMember("translation") && transformData["translation"].IsObject())
+        {
+            const rapidjson::Value &translationData = transformData["translation"];
+            if (translationData.HasMember("x") && translationData.HasMember("y") && translationData.HasMember("z") &&
+                translationData["x"].IsDouble() && translationData["y"].IsDouble() && translationData["z"].IsDouble())
+            {
+                frameTransform.translation.setX(translationData["x"].GetDouble());
+                frameTransform.translation.setY(translationData["y"].GetDouble());
+                frameTransform.translation.setZ(translationData["z"].GetDouble());
+            }
+            else
+            {
+                // 错误处理，translation 数据无效
+                ROS_ERROR("Invalid translation data.");
+                continue;
+            }
+        }
+        else
+        {
+            // 错误处理，translation 数据不存在或者不是对象
+            ROS_ERROR("translation data not found or not an object.");
+            continue;
+        }
+
+        // 解析 rotation 数据
+        if (transformData.HasMember("rotation") && transformData["rotation"].IsObject())
+        {
+            const rapidjson::Value &orientationData = transformData["rotation"];
+            if (orientationData.HasMember("yaw") && orientationData["yaw"].IsDouble())
+            {
+                frameTransform.rotation.setRPY(0, 0, orientationData["yaw"].GetDouble());
+                frameTransform.rotation.normalize();
+            }
+            else
+            {
+                // 错误处理，rotation 数据无效
+                ROS_ERROR("Yaw data not found or not a double.");
+                continue;
+            }
+        }
+        else
+        {
+            // 错误处理，rotation 数据不存在或者不是对象
+            ROS_ERROR("rotation data not found or not an object.");
+            continue;
+        }
+
+        // 将解析的坐标变换关系添加到 vector 中
+        frameTransforms.push_back(frameTransform);
+    }
+    frameTransforms_ = std::move(frameTransforms);
+    ROS_INFO(SUCCESS("Loaded %zu transform frames from JSON file."), frameTransforms_.size());
+}
+
+bool FrameManager::isWorldFrameExist() const
+{
+    if (!frameTransforms_.empty())
+    {
+        // 获取第一个 frameTransform 的 target_frame_id
+        const std::string &world_frame_id = frameTransforms_[0].target_frame_id;
+        return isFrameExist(world_frame_id);
+    }
+    // 如果 frameTransforms_ 为空，直接返回 false
+    return false;
+}
+
+bool FrameManager::isFrameExist(const std::string &frame_id) const
+{
+    return tf_buffer_._frameExists(frame_id);
+}
+bool FrameManager::isTargetExist(const waypoint::FrameTransform &frame) const
+{
+    return isFrameExist(frame.target_frame_id);
+}
+
+void FrameManager::publishFrame(const waypoint::FrameTransform &frame)
+{
+    geometry_msgs::TransformStamped transform_stamped;
+    transform_stamped.header.frame_id = frame.target_frame_id;
+    transform_stamped.child_frame_id = frame.source_frame_id;
+    transform_stamped.transform.translation.x = frame.translation.getX();
+    transform_stamped.transform.translation.y = frame.translation.getY();
+    transform_stamped.transform.translation.z = frame.translation.getZ();
+    transform_stamped.transform.rotation.x = frame.rotation.getX();
+    transform_stamped.transform.rotation.y = frame.rotation.getY();
+    transform_stamped.transform.rotation.z = frame.rotation.getZ();
+    transform_stamped.transform.rotation.w = frame.rotation.getW();
+    static_tf_broadcaster_.sendTransform(transform_stamped);
+    ROS_INFO("Published new Transform:");
+    ROS_INFO("%s <-- %s", frame.target_frame_id.c_str(), frame.source_frame_id.c_str());
+    ROS_INFO("------------------------");
 }

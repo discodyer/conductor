@@ -17,7 +17,7 @@
 #include "conductor/mission_state.h"
 #include "conductor/ansi_color.h"
 #include "conductor/apm.h"
-#include "conductor/way_point.h"
+#include "conductor/waypoint.h"
 
 #include "signal.h" //necessary for the Custom SIGINT handler
 #include "stdio.h"  //necessary for the Custom SIGINT handler
@@ -101,7 +101,7 @@ int main(int argc, char **argv)
         case kPose:
             if (!waypointManager.is_current_waypoint_published_)
             {
-                way_point::Waypoint current_waypoint = waypointManager.getCurrentWaypoint();
+                waypoint::Waypoint current_waypoint = waypointManager.getCurrentWaypoint();
                 waypointManager.printCurrentWaypoint();
                 apm.setMoveSpeed(current_waypoint.air_speed); // 设置空速
                 apm.setPoseWorld(current_waypoint.position.x,
