@@ -61,13 +61,6 @@ int main(int argc, char **argv)
                                {0.5, 0.0, 0.9, 0.1, 20, 0.05},
                                {0.5, 0.0, 0.9, 0.1, 20, 0.05});
 
-    // wait for FCU connection
-    // while (ros::ok() && !apm.current_state.connected && !is_interrupted)
-    // {
-    //     ros::spinOnce();
-    //     apm.rate.sleep();
-    // }
-
     // ROS_INFO(SUCCESS("Drone connected!"));
     fixed_point_red.clear();
 

@@ -61,8 +61,13 @@ int main(int argc, char **argv)
     MissionState drone_state = kPrearm;
 
     // wait for FCU connection
-    while (ros::ok() && !current_state.connected)
+    while (ros::ok() && !current_state.connected && !is_interrupted)
     {
+        if (is_interrupted)
+        {
+            ros::shutdown();
+            return 0;
+        }
         ros::spinOnce();
         rate.sleep();
     }
@@ -133,7 +138,7 @@ int main(int argc, char **argv)
                 if (takeoff_client.call(takeoff_cmd))
                 {
                     ROS_INFO("Vehicle Takeoff!");
-                    drone_state = land;
+                    drone_state = kLand;
                     last_request = ros::Time::now();
                 }
                 else
@@ -142,7 +147,6 @@ int main(int argc, char **argv)
                     drone_state = kArm;
                     last_request = ros::Time::now();
                 }
-                
             }
 
             break;

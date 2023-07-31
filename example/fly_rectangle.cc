@@ -61,6 +61,11 @@ int main(int argc, char **argv)
     // wait for FCU connection
     while (ros::ok() && !apm.current_state.connected && !is_interrupted)
     {
+        if (is_interrupted)
+        {
+            ros::shutdown();
+            return 0;
+        }
         ros::spinOnce();
         apm.rate.sleep();
     }
