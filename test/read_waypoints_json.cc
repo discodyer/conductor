@@ -30,6 +30,9 @@ int main(int argc, char **argv)
         return false;
     }
 
+    transformManager.printFrameInfoALL();
+    transformManager.publishFrameAll();
+
     // 输出航点数据
     while (ros::ok())
     {
