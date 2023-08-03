@@ -52,11 +52,30 @@ int main(int argc, char **argv)
 
     signal(SIGINT, safeSigintHandler);
 
-    std::string jsonFilePath = "./src/conductor/example/json/zhibao_waypoint.json";
+    std::string transformJsonFilePath = "./src/conductor/example/json/transforms.json"; // 修改为你的 JSON 文件路径
+
+    FrameManager transformManager(transformJsonFilePath);
+
+    std::string waypointJsonFilePath = "./src/conductor/example/json/zhibao_waypoint.json"; // 修改为你的 JSON 文件路径
+
+    // 创建 WaypointManager 实例，并从 JSON 文件读取航点数据
+    WaypointManager waypointManager(waypointJsonFilePath);
+
+    ROS_INFO(COLORED_TEXT("Showing frame info:", ANSI_COLOR_BLUE));
+
+    while (ros::ok())
+    {
+        transformManager.printFrameInfoALL();
+        break;
+    }
+
+    if(!transformManager.isWorldFrameExist())
+    {
+        ROS_ERROR("World frame \"%s\" not found! exiting...", transformManager.getWorldFrameID().c_str());
+        return false;
+    }
 
     ArduConductor apm(nh);
-
-    WaypointManager waypointManager(jsonFilePath);
 
     // wait for FCU connection
     while (ros::ok() && !apm.current_state.connected && !is_interrupted)
@@ -107,12 +126,13 @@ int main(int argc, char **argv)
             if (!waypointManager.is_current_waypoint_published_)
             {
                 waypoint::Waypoint current_waypoint = waypointManager.getCurrentWaypoint();
+                waypoint::Waypoint world_waypoint = transformManager.getWorldWaypoint(current_waypoint);
                 waypointManager.printCurrentWaypoint();
-                apm.setMoveSpeed(current_waypoint.air_speed); // 设置空速
-                apm.setPoseWorld(current_waypoint.position.x,
-                                current_waypoint.position.y,
-                                current_waypoint.position.z,
-                                current_waypoint.yaw);
+                apm.setMoveSpeed(world_waypoint.air_speed); // 设置空速
+                apm.setPoseWorld(world_waypoint.position.x,
+                                world_waypoint.position.y,
+                                world_waypoint.position.z,
+                                world_waypoint.yaw);
                 waypointManager.is_current_waypoint_published_ = true;
             }
 

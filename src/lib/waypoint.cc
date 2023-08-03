@@ -454,40 +454,27 @@ bool FrameManager::isTargetExist(const waypoint::FrameTransform &frame) const
 
 void FrameManager::publishFrame(const waypoint::FrameTransform &frame)
 {
+    // 使用 static_tf_broadcaster_ 发布坐标关系
     geometry_msgs::TransformStamped transform_stamped;
+    transform_stamped.header.stamp = ros::Time::now();
     transform_stamped.header.frame_id = frame.target_frame_id;
     transform_stamped.child_frame_id = frame.source_frame_id;
-    transform_stamped.transform.translation.x = frame.translation.getX();
-    transform_stamped.transform.translation.y = frame.translation.getY();
-    transform_stamped.transform.translation.z = frame.translation.getZ();
-    transform_stamped.transform.rotation.x = frame.rotation.getX();
-    transform_stamped.transform.rotation.y = frame.rotation.getY();
-    transform_stamped.transform.rotation.z = frame.rotation.getZ();
-    transform_stamped.transform.rotation.w = frame.rotation.getW();
-    static_tf_broadcaster_.sendTransform(transform_stamped);
+    transform_stamped.transform.translation.x = frame.translation.x();
+    transform_stamped.transform.translation.y = frame.translation.y();
+    transform_stamped.transform.translation.z = frame.translation.z();
+    transform_stamped.transform.rotation.x = frame.rotation.x();
+    transform_stamped.transform.rotation.y = frame.rotation.y();
+    transform_stamped.transform.rotation.z = frame.rotation.z();
+    transform_stamped.transform.rotation.w = frame.rotation.w();
 
-    ROS_INFO("Published new Transform:");
-    printFrameInfo(frame);
+    static_tf_broadcaster_.sendTransform(transform_stamped);
 }
 
 void FrameManager::publishFrameAll()
 {
     for (const auto &frame : frameTransforms_)
     {
-        // 使用 static_tf_broadcaster_ 发布坐标关系
-        geometry_msgs::TransformStamped transform_stamped;
-        transform_stamped.header.stamp = ros::Time::now();
-        transform_stamped.header.frame_id = frame.target_frame_id;
-        transform_stamped.child_frame_id = frame.source_frame_id;
-        transform_stamped.transform.translation.x = frame.translation.x();
-        transform_stamped.transform.translation.y = frame.translation.y();
-        transform_stamped.transform.translation.z = frame.translation.z();
-        transform_stamped.transform.rotation.x = frame.rotation.x();
-        transform_stamped.transform.rotation.y = frame.rotation.y();
-        transform_stamped.transform.rotation.z = frame.rotation.z();
-        transform_stamped.transform.rotation.w = frame.rotation.w();
-
-        static_tf_broadcaster_.sendTransform(transform_stamped);
+        publishFrame(frame);
     }
 }
 
@@ -504,6 +491,7 @@ void FrameManager::printFrameInfo(const waypoint::FrameTransform &frame) const
 
 void FrameManager::printFrameInfoALL() const
 {
+    ROS_INFO(COLORED_TEXT("Showing frame info:", ANSI_STYLE_BOLD ANSI_COLOR_BLUE));
     for (const auto &frame : frameTransforms_)
     {
         printFrameInfo(frame);

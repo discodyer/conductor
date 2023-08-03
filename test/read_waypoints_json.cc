@@ -20,10 +20,14 @@ int main(int argc, char **argv)
 
     ros::Rate rate(10);
 
-    while (ros::ok())
+    if (!transformManager.isWorldFrameExist())
     {
         transformManager.printFrameInfoALL();
-        break;
+    }
+    else
+    {
+        ROS_ERROR("World frame \"%s\" not found! exiting...", transformManager.getWorldFrameID().c_str());
+        return false;
     }
 
     // 输出航点数据
@@ -42,7 +46,7 @@ int main(int argc, char **argv)
             ROS_INFO("Delay: %f", world_waypoint.delay);
             ROS_INFO("Air Speed: %f", world_waypoint.air_speed);
             ROS_INFO(COLORED_TEXT("-----------------------------", "\033[1m"));
-            
+
             waypointManager.is_current_waypoint_published_ = true;
         }
 
