@@ -202,6 +202,11 @@ add_executable(zhibao src/zhibao.cc)
 add_dependencies(zhibao ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(zhibao conductor ${catkin_LIBRARIES})
 
+# 23年国赛
+add_executable(firefighter src/firefighter.cc)
+add_dependencies(firefighter ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(firefighter conductor ${catkin_LIBRARIES})
+
 
 # add_dependencies(test beginner_tutorials_generate_messages_cpp)
 
