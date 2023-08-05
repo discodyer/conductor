@@ -1,0 +1,186 @@
+{
+    "waypoints": [
+        {
+            "index": 0,
+            "type": "PoseAbsolute",
+            "frame_id": "map",
+            "position": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "yaw": 0.0,
+            "delay": 5.0,
+            "air_speed": 0.3
+        },
+        {
+            "index": 1,
+            "type": "PoseAbsolute",
+            "frame_id": "map",
+            "position": {
+                "x": 3.2,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "yaw": 0.0,
+            "delay": 13.0,
+            "air_speed": 0.3
+        },
+        {
+            "index": 2,
+            "type": "PoseAbsolute",
+            "frame_id": "map",
+            "position": {
+                "x": 3.2,
+                "y": -4.0,
+                "z": 0.0
+            },
+            "yaw": 0.0,
+            "delay": 15.0,
+            "air_speed": 0.3
+        },
+        {
+            "index": 3,
+            "type": "PoseAbsolute",
+            "frame_id": "map",
+            "position": {
+                "x": 0.0,
+                "y": -4.0,
+                "z": 0.0
+            },
+            "yaw": 0.0,
+            "delay": 13.0,
+            "air_speed": 0.3
+        },
+        {
+            "index": 4,
+            "type": "PoseAbsolute",
+            "frame_id": "map",
+            "position": {
+                "x": 0.0,
+                "y": -3.2,
+                "z": 0.0
+            },
+            "yaw": 0.0,
+            "delay": 4.0,
+            "air_speed": 0.3
+        },
+        {
+            "index": 5,
+            "type": "PoseAbsolute",
+            "frame_id": "map",
+            "position": {
+                "x": 2.4,
+                "y": -3.2,
+                "z": 0.0
+            },
+            "yaw": 0.0,
+            "delay": 10.0,
+            "air_speed": 0.3
+        },
+        {
+            "index": 6,
+            "type": "PoseAbsolute",
+            "frame_id": "map",
+            "position": {
+                "x": 2.4,
+                "y": -2.4,
+                "z": 0.0
+            },
+            "yaw": 0.0,
+            "delay": 4.0,
+            "air_speed": 0.3
+        },
+        {
+            "index": 7,
+            "type": "PoseAbsolute",
+            "frame_id": "map",
+            "position": {
+                "x": 0.0,
+                "y": -2.4,
+                "z": 0.0
+            },
+            "yaw": 0.0,
+            "delay": 10.0,
+            "air_speed": 0.3
+        },
+        {
+            "index": 8,
+            "type": "PoseAbsolute",
+            "frame_id": "map",
+            "position": {
+                "x": 0.0,
+                "y": -1.6,
+                "z": 0.0
+            },
+            "yaw": 0.0,
+            "delay": 4.0,
+            "air_speed": 0.3
+        },
+        {
+            "index": 9,
+            "type": "PoseAbsolute",
+            "frame_id": "map",
+            "position": {
+                "x": 2.4,
+                "y": -1.6,
+                "z": 0.0
+            },
+            "yaw": 0.0,
+            "delay": 10.0,
+            "air_speed": 0.3
+        },
+        {
+            "index": 10,
+            "type": "PoseAbsolute",
+            "frame_id": "map",
+            "position": {
+                "x": 2.4,
+                "y": -0.8,
+                "z": 0.0
+            },
+            "yaw": 0.0,
+            "delay": 4.0,
+            "air_speed": 0.3
+        },
+        {
+            "index": 11,
+            "type": "PoseAbsolute",
+            "frame_id": "map",
+            "position": {
+                "x": 0.0,
+                "y": -0.8,
+                "z": 0.0
+            },
+            "yaw": 0.0,
+            "delay": 10.0,
+            "air_speed": 0.3
+        },
+        {
+            "index": 12,
+            "type": "PoseAbsolute",
+            "frame_id": "map",
+            "position": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "yaw": 0.0,
+            "delay": 4.0,
+            "air_speed": 0.3
+        },
+        {
+            "index": 13,
+            "type": "PoseAbsolute",
+            "frame_id": "map",
+            "position": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": -0.5
+            },
+            "yaw": 0.0,
+            "delay": 4.0,
+            "air_speed": 0.3
+        }
+    ]
+}

@@ -1,0 +1,28 @@
+{
+    "transforms": [
+        {
+            "source_frame_id": "world",
+            "target_frame_id": "camera_init",
+            "translation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "rotation": {
+                "yaw": 0.0
+            }
+        },
+        {
+            "source_frame_id": "map",
+            "target_frame_id": "world",
+            "translation": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 1.5
+            },
+            "rotation": {
+                "yaw": 0.0
+            }
+        }
+    ]
+}
