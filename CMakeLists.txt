@@ -25,6 +25,9 @@ find_package(catkin REQUIRED COMPONENTS
   tf2_geometry_msgs
 )
 
+find_package(PkgConfig)
+pkg_check_modules(LIBSERIAL REQUIRED libserial)
+
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
 
@@ -119,7 +122,7 @@ generate_messages(
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
  INCLUDE_DIRS include
-#  LIBRARIES conductor
+ LIBRARIES conductor
 #  CATKIN_DEPENDS geometry_msgs mavros_msgs roscpp rospy std_msgs
 #  DEPENDS system_lib
 )
@@ -134,6 +137,7 @@ include_directories(
   include
   ${catkin_INCLUDE_DIRS}
 )
+include_directories(${LIBSERIAL_INCLUDE_DIRS})
 
 ## Declare a C++ library
 # add_library(conductor
@@ -202,6 +206,10 @@ add_executable(zhibao src/zhibao.cc)
 add_dependencies(zhibao ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(zhibao conductor ${catkin_LIBRARIES})
 
+# 小车通信
+add_executable(communication src/communication.cc)
+add_dependencies(communication ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(communication conductor ${catkin_LIBRARIES} ${LIBSERIAL_LIBRARIES})
 
 # add_dependencies(test beginner_tutorials_generate_messages_cpp)
 
