@@ -69,14 +69,7 @@ int main(int argc, char **argv)
         break;
     }
 
-    // if(!transformManager.isWorldFrameExist())
-    // {
-    //     ROS_ERROR("World frame \"%s\" not found! exiting...", transformManager.getWorldFrameID().c_str());
-    //     return false;
-    // }
-
     transformManager.publishFrameAll();
-
     ArduConductor apm(nh);
 
     // wait for FCU connection
