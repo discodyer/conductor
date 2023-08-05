@@ -11,7 +11,7 @@
             },
             "yaw": 0.0,
             "delay": 5.0,
-            "air_speed": 0.3
+            "air_speed": 0.4
         },
         {
             "index": 1,
@@ -24,7 +24,7 @@
             },
             "yaw": 0.0,
             "delay": 13.0,
-            "air_speed": 0.3
+            "air_speed": 0.4
         },
         {
             "index": 2,
@@ -37,7 +37,7 @@
             },
             "yaw": 0.0,
             "delay": 15.0,
-            "air_speed": 0.3
+            "air_speed": 0.4
         },
         {
             "index": 3,
@@ -50,7 +50,7 @@
             },
             "yaw": 0.0,
             "delay": 13.0,
-            "air_speed": 0.3
+            "air_speed": 0.4
         },
         {
             "index": 4,
@@ -63,7 +63,7 @@
             },
             "yaw": 0.0,
             "delay": 4.0,
-            "air_speed": 0.3
+            "air_speed": 0.4
         },
         {
             "index": 5,
@@ -76,7 +76,7 @@
             },
             "yaw": 0.0,
             "delay": 10.0,
-            "air_speed": 0.3
+            "air_speed": 0.4
         },
         {
             "index": 6,
@@ -89,7 +89,7 @@
             },
             "yaw": 0.0,
             "delay": 4.0,
-            "air_speed": 0.3
+            "air_speed": 0.4
         },
         {
             "index": 7,
@@ -102,7 +102,7 @@
             },
             "yaw": 0.0,
             "delay": 10.0,
-            "air_speed": 0.3
+            "air_speed": 0.4
         },
         {
             "index": 8,
@@ -115,7 +115,7 @@
             },
             "yaw": 0.0,
             "delay": 4.0,
-            "air_speed": 0.3
+            "air_speed": 0.4
         },
         {
             "index": 9,
@@ -128,7 +128,7 @@
             },
             "yaw": 0.0,
             "delay": 10.0,
-            "air_speed": 0.3
+            "air_speed": 0.4
         },
         {
             "index": 10,
@@ -141,7 +141,7 @@
             },
             "yaw": 0.0,
             "delay": 4.0,
-            "air_speed": 0.3
+            "air_speed": 0.4
         },
         {
             "index": 11,
@@ -154,7 +154,7 @@
             },
             "yaw": 0.0,
             "delay": 10.0,
-            "air_speed": 0.3
+            "air_speed": 0.4
         },
         {
             "index": 12,
@@ -167,7 +167,7 @@
             },
             "yaw": 0.0,
             "delay": 4.0,
-            "air_speed": 0.3
+            "air_speed": 0.4
         },
         {
             "index": 13,
@@ -180,7 +180,7 @@
             },
             "yaw": 0.0,
             "delay": 4.0,
-            "air_speed": 0.3
+            "air_speed": 0.4
         }
     ]
 }
