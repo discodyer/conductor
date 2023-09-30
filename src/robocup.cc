@@ -1,6 +1,6 @@
 /**
- * @file surrounding_pillars.cpp
- * @brief 绕杆飞行测试，使用Conductor封装库
+ * @file robocup.cpp
+ * @brief RoboCup2023，使用Conductor封装库
  */
 
 #include <ros/ros.h>
@@ -47,7 +47,7 @@ void safeSigintHandler(int sig)
 
 int main(int argc, char **argv)
 {
-    ros::init(argc, argv, "guided_node", ros::init_options::NoSigintHandler);
+    ros::init(argc, argv, "robocup_guided_node", ros::init_options::NoSigintHandler);
     ros::NodeHandle nh;
 
     signal(SIGINT, safeSigintHandler);
@@ -99,7 +99,7 @@ int main(int argc, char **argv)
         // 任务执行状态机
         switch (apm.mission_state)
         {
-        case kPrearm:
+        case MissionState::kPrearm:
             if (apm.setModeGuided(5.0)) // 修改飞行模式为 Guided (ArduCopter)
             {
                 apm.sendGpOrigin();     // 如果切换成Guided模式就发送全局原点坐标
@@ -107,14 +107,14 @@ int main(int argc, char **argv)
             }
             break;
 
-        case kArm:
+        case MissionState::kArm:
             apm.arm(5.0); // 解锁电机
             break;
 
-        case kTakeoff:
+        case MissionState::kTakeoff:
             if (apm.takeoff(0.5, 1.0)) // 起飞到1m高度
             {
-                apm.mission_state = kPose;
+                apm.mission_state = MissionState::kPose;
                 ros::Duration(2.0).sleep();
                 ROS_INFO(MISSION_SWITCH_TO("pose"));
                 waypointManager.resetDelayTime();
@@ -122,7 +122,7 @@ int main(int argc, char **argv)
 
             break;
 
-        case kPose:
+        case MissionState::kPose:
             if (!waypointManager.is_current_waypoint_published_)
             {
                 waypoint::Waypoint current_waypoint = waypointManager.getCurrentWaypoint();
@@ -141,12 +141,12 @@ int main(int argc, char **argv)
                 if (!waypointManager.goToNextWaypoint())
                 {
                     apm.last_request = ros::Time::now();
-                    apm.mission_state = kLand;
+                    apm.mission_state = MissionState::kLand;
                 }
             }
             break;
 
-        case kLand:
+        case MissionState::kLand:
             if (apm.land(5.0)) // 10s后降落
             {
                 ros::shutdown();

@@ -22,7 +22,7 @@ BaseConductor::BaseConductor(ros::NodeHandle &nodehandle, double rate_num)
     : rate(rate_num),
       nh_(nodehandle)
 {
-    mission_state = kPrearm;
+    mission_state = MissionState::kPrearm;
     this->initNode();
 }
 

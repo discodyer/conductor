@@ -89,7 +89,7 @@ int main(int argc, char **argv)
         // 任务执行状态机
         switch (apm.mission_state)
         {
-        case kPrearm:
+        case MissionState::kPrearm:
             if (apm.setModeGuided(5.0)) // 修改飞行模式为 Guided (ArduCopter)
             {
                 apm.sendGpOrigin();    // 如果切换成Guided模式就发送全局原点坐标
@@ -97,20 +97,20 @@ int main(int argc, char **argv)
             }
             break;
 
-        case kArm:
+        case MissionState::kArm:
             apm.arm(5.0); // 解锁电机
             break;
 
-        case kTakeoff:
+        case MissionState::kTakeoff:
             if (apm.takeoff(0.5,1.0)) // 起飞到1M高度
             {
-                apm.mission_state = kPose;
+                apm.mission_state = MissionState::kPose;
                 ROS_INFO(MISSION_SWITCH_TO("pose"));
             }
 
             break;
 
-        case kPose:
+        case MissionState::kPose:
             if (apm.isTimeElapsed(2.0) && count == 0)
             {
                 apm.setPoseBody(0, 0, 0.6, 0);
@@ -137,11 +137,11 @@ int main(int argc, char **argv)
             {
                 apm.last_request = ros::Time::now();
                 apm.setSpeedBody(0, 0, 0, 0);
-                apm.mission_state = kLand;
+                apm.mission_state = MissionState::kLand;
             }
             break;
 
-        case kLand:
+        case MissionState::kLand:
             if (apm.land(5.0)) // 10s后降落
             {
                 ros::shutdown();

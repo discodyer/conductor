@@ -92,7 +92,7 @@ int main(int argc, char **argv)
     {
         switch (drone_state)
         {
-        case kPrearm:
+        case MissionState::kPrearm:
             if (current_state.mode != "GUIDED" &&
                 (ros::Time::now() - last_request > ros::Duration(5.0)))
             {
@@ -113,7 +113,7 @@ int main(int argc, char **argv)
             }
             break;
 
-        case kArm:
+        case MissionState::kArm:
             if (!current_state.armed &&
                 (ros::Time::now() - last_request > ros::Duration(5.0)))
             {
@@ -132,7 +132,7 @@ int main(int argc, char **argv)
             }
             break;
 
-        case kTakeoff:
+        case MissionState::kTakeoff:
             if (ros::Time::now() - last_request > ros::Duration(3.0))
             {
                 if (takeoff_client.call(takeoff_cmd))
@@ -151,7 +151,7 @@ int main(int argc, char **argv)
 
             break;
 
-        case kLand:
+        case MissionState::kLand:
             if (current_state.armed &&
                 (ros::Time::now() - last_request > ros::Duration(10.0)))
             {

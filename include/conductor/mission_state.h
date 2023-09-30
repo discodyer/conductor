@@ -5,14 +5,15 @@
 void safeSigintHandler(int sig);
 
 // 飞行任务状态
-enum MissionState
+enum class MissionState
 {
     kPrearm,
     kArm,
     kTakeoff,
     kPose,
     kLand,
-    kTarget
+    kTarget,
+    kWayback
 };
 
 #endif // MISSION_STATE_H
