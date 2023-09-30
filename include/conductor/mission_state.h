@@ -11,7 +11,8 @@ enum MissionState
     kArm,
     kTakeoff,
     kPose,
-    kLand
+    kLand,
+    kTarget
 };
 
 #endif // MISSION_STATE_H

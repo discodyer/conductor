@@ -211,6 +211,11 @@ add_executable(firefighter src/firefighter.cc)
 add_dependencies(firefighter ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(firefighter conductor ${catkin_LIBRARIES})
 
+# 23年RoboCup
+add_executable(robocup src/robocup.cc)
+add_dependencies(robocup ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(robocup conductor ${catkin_LIBRARIES})
+
 # 小车通信
 add_executable(communication src/communication.cc)
 add_dependencies(communication ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})

@@ -93,7 +93,7 @@ int main(int argc, char **argv)
             break;
 
         case kTakeoff:
-            if (apm.takeoff(0.5)) // 起飞到1M高度
+            if (apm.takeoff(0.5,1.0)) // 起飞到1M高度
             {
                 ros::Duration(2.0).sleep();
                 apm.mission_state = kPose;

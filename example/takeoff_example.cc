@@ -87,7 +87,7 @@ int main(int argc, char **argv)
             break;
 
         case kTakeoff:
-            if (apm.takeoff(1.0)) // 起飞到1M高度
+            if (apm.takeoff(0.5, 1.0)) // 起飞到1M高度
             {
                 apm.mission_state = kLand;
                 ROS_INFO(MISSION_SWITCH_TO("land"));
