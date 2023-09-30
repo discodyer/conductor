@@ -54,9 +54,33 @@ int main(int argc, char **argv)
 
     std::string transformJsonFilePath = "./src/conductor/example/json/transforms.json"; // 修改为你的 JSON 文件路径
 
-    FrameManager transformManager(transformJsonFilePath);
+    std::string waypointJsonFilePath = "./src/conductor/example/json/waypoints.json"; // 修改为你的 JSON 文件路径
 
-    std::string waypointJsonFilePath = "./src/conductor/example/json/zhibao_waypoint.json"; // 修改为你的 JSON 文件路径
+    // Read parameters from launch file, including: transformJsonFilePath, waypointJsonFilePath
+    {
+        // The frame in which we find the transform into, the original "world" frame
+        if (nh.getParam("transform_json_path", transformJsonFilePath))
+        {
+            ROS_INFO("Get transform json path parameter: %s", transformJsonFilePath.c_str());
+        }
+        else
+        {
+            ROS_WARN("Using default transform json path: %s", transformJsonFilePath.c_str());
+        }
+
+        // The frame for which we find the tranform to target_frame_id, the original "lidar" frame
+        if (nh.getParam("waypoint_json_path", waypointJsonFilePath))
+        {
+            ROS_INFO("Get waypoint json path parameter: %s", waypointJsonFilePath.c_str());
+        }
+        else
+        {
+            ROS_WARN("Using default waypoint json path: %s", waypointJsonFilePath.c_str());
+        }
+    }
+
+    // 创建 FrameManager 实例，并从 JSON 文件读取坐标变换数据
+    FrameManager transformManager(transformJsonFilePath);
 
     // 创建 WaypointManager 实例，并从 JSON 文件读取航点数据
     WaypointManager waypointManager(waypointJsonFilePath);

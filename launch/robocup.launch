@@ -1,0 +1,11 @@
+<launch>
+
+    <arg name="transform_json_path"   default="./src/conductor/example/json/transforms.json" />
+    <param name="transform_json_path"   value="$(arg transform_json_path)" />
+
+    <arg name="waypoint_json_path"   default="./src/conductor/example/json/waypoints.json" />
+    <param name="waypoint_json_path"   value="$(arg waypoint_json_path)" />
+
+    <node pkg="conductor" type="robocup" name="robocup_guided_node" output="screen" respawn="true">
+    </node>
+</launch>
