@@ -433,14 +433,25 @@ FrameManager::FrameManager(const std::string &jsonFilePath)
 
 bool FrameManager::isWorldFrameExist() const
 {
-    if (!frameTransforms_.empty())
+    // if (!frameTransforms_.empty())
+    // {
+    //     // 获取第一个 frameTransform 的 target_frame_id
+    //     const std::string &world_frame_id = frameTransforms_[0].target_frame_id;
+    //     return isFrameExist(world_frame_id);
+    // }
+    // // 如果 frameTransforms_ 为空，直接返回 false
+    // return false;
+    try
     {
-        // 获取第一个 frameTransform 的 target_frame_id
-        const std::string &world_frame_id = frameTransforms_[0].target_frame_id;
-        return isFrameExist(world_frame_id);
+        geometry_msgs::TransformStamped transform_stamped = tf_buffer_.lookupTransform("camera_init", "body", ros::Time(0), ros::Duration(1.0));
+        ROS_INFO("Transform from body to camera_init exists.");
+        return true;
     }
-    // 如果 frameTransforms_ 为空，直接返回 false
-    return false;
+    catch (tf2::TransformException &ex)
+    {
+        ROS_WARN("Transform from body to camera_init does not exist");
+        return false;
+    }
 }
 
 bool FrameManager::isFrameExist(const std::string &frame_id) const

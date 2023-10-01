@@ -19,6 +19,7 @@
 #include "conductor/apm.h"
 #include "conductor/waypoint.h"
 
+#include <string.h>
 #include "signal.h" //necessary for the Custom SIGINT handler
 #include "stdio.h"  //necessary for the Custom SIGINT handler
 
@@ -52,38 +53,50 @@ int main(int argc, char **argv)
 
     signal(SIGINT, safeSigintHandler);
 
-    std::string transformJsonFilePath = "./src/conductor/example/json/transforms.json"; // 修改为你的 JSON 文件路径
+    double startup_delay = 0.0;
 
-    std::string waypointJsonFilePath = "./src/conductor/example/json/waypoints.json"; // 修改为你的 JSON 文件路径
+    std::string transform_json_path = "./src/conductor/example/json/transforms.json"; // 修改为你的 JSON 文件路径
+
+    std::string waypoint_json_path = "./src/conductor/example/json/waypoints.json"; // 修改为你的 JSON 文件路径
 
     // Read parameters from launch file, including: transformJsonFilePath, waypointJsonFilePath
     {
-        // The frame in which we find the transform into, the original "world" frame
-        if (nh.getParam("transform_json_path", transformJsonFilePath))
+        if (nh.getParam("/robocup_guided_node/transform_json_path", transform_json_path))
         {
-            ROS_INFO("Get transform json path parameter: %s", transformJsonFilePath.c_str());
+            ROS_INFO("Get transform json path parameter: %s", transform_json_path.c_str());
         }
         else
         {
-            ROS_WARN("Using default transform json path: %s", transformJsonFilePath.c_str());
+            ROS_WARN("Using default transform json path: %s", transform_json_path.c_str());
         }
 
-        // The frame for which we find the tranform to target_frame_id, the original "lidar" frame
-        if (nh.getParam("waypoint_json_path", waypointJsonFilePath))
+        if (nh.getParam("/robocup_guided_node/waypoint_json_path", waypoint_json_path))
         {
-            ROS_INFO("Get waypoint json path parameter: %s", waypointJsonFilePath.c_str());
+            ROS_INFO("Get waypoint json path parameter: %s", waypoint_json_path.c_str());
         }
         else
         {
-            ROS_WARN("Using default waypoint json path: %s", waypointJsonFilePath.c_str());
+            ROS_WARN("Using default waypoint json path: %s", waypoint_json_path.c_str());
+        }
+
+        if (nh.getParam("/robocup_guided_node/startup_delay", startup_delay))
+        {
+            ROS_INFO("Get startup_delay parameter: %f", startup_delay);
+        }
+        else
+        {
+            ROS_WARN("Using default startup_delay: %f", startup_delay);
         }
     }
 
+    // startup delay
+    ros::Duration(startup_delay).sleep();
+
     // 创建 FrameManager 实例，并从 JSON 文件读取坐标变换数据
-    FrameManager transformManager(transformJsonFilePath);
+    FrameManager transformManager(transform_json_path);
 
     // 创建 WaypointManager 实例，并从 JSON 文件读取航点数据
-    WaypointManager waypointManager(waypointJsonFilePath);
+    WaypointManager waypointManager(waypoint_json_path);
 
     ROS_INFO(COLORED_TEXT("Showing frame info:", ANSI_COLOR_BLUE));
 
@@ -95,9 +108,10 @@ int main(int argc, char **argv)
 
     if (!transformManager.isWorldFrameExist())
     {
-        ROS_ERROR("World frame \"%s\" not found! exiting...", transformManager.getWorldFrameID().c_str());
         return false;
     }
+
+    transformManager.publishFrameAll();
 
     ArduConductor apm(nh);
 
@@ -136,7 +150,7 @@ int main(int argc, char **argv)
             break;
 
         case MissionState::kTakeoff:
-            if (apm.takeoff(0.5, 1.0)) // 起飞到1m高度
+            if (apm.takeoff(0.5, 1.0, 2.0)) // 起飞到1m高度
             {
                 apm.mission_state = MissionState::kPose;
                 ros::Duration(2.0).sleep();

@@ -256,12 +256,8 @@ bool ArduConductor::takeoff(double pre_takeoff_alt, double altitude, double dela
 		flag_takeoff = APMTakeoffState::kTakeoff1;
 		return false;
 	}
-	else
-	{
-		return false;
-	}
 
-	if (isTimeElapsed(delay + 2.0) && flag_takeoff == APMTakeoffState::kTakeoff1)
+	if (isTimeElapsed(delay) && flag_takeoff == APMTakeoffState::kTakeoff1)
 	{
 		ros::ServiceClient takeoff_client; // 客户端 - 起飞
 		takeoff_client = nh_.serviceClient<mavros_msgs::CommandTOL>("mavros/cmd/takeoff");
@@ -272,7 +268,7 @@ bool ArduConductor::takeoff(double pre_takeoff_alt, double altitude, double dela
 		{
 			ROS_INFO(SUCCESS("Vehicle pre-Takeoff to altitude: %0.2f"), pre_takeoff_alt);
 			// updateLastRequestTime();
-			this->flag_takeoff == APMTakeoffState::kTakeoff2;
+			this->flag_takeoff = APMTakeoffState::kTakeoff2;
 			return false;
 		}
 		else
@@ -284,12 +280,8 @@ bool ArduConductor::takeoff(double pre_takeoff_alt, double altitude, double dela
 			return false;
 		}
 	}
-	else
-	{
-		return false;
-	}
 
-	if (isTimeElapsed(delay + 4.0) && flag_takeoff == APMTakeoffState::kTakeoff2)
+	if (isTimeElapsed(delay + 2.0) && flag_takeoff == APMTakeoffState::kTakeoff2)
 	{
 		this->setMoveSpeed(0.2); // 设置空速
 		this->setPoseWorld(0,
@@ -299,12 +291,8 @@ bool ArduConductor::takeoff(double pre_takeoff_alt, double altitude, double dela
 
 		ROS_INFO(SUCCESS("Vehicle Takeoff to world_frame altitude: %0.2f"), altitude);
 		updateLastRequestTime();
-		this->flag_takeoff == APMTakeoffState::kArmed;
+		this->flag_takeoff = APMTakeoffState::kArmed;
 		return true;
-	}
-	else
-	{
-		return false;
 	}
 
 	return false;

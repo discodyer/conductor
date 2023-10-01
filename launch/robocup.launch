@@ -1,11 +1,15 @@
 <launch>
+    <!-- vim: set ft=xml noet : -->
 
-    <arg name="transform_json_path"   default="./src/conductor/example/json/transforms.json" />
-    <param name="transform_json_path"   value="$(arg transform_json_path)" />
+    <arg name="transform_json_path" />
+    <arg name="waypoint_json_path" />
+    <arg name="startup_delay" />
+    <arg name="log_output" default="screen" />
+    <arg name="respawn_conductor" default="false" />
 
-    <arg name="waypoint_json_path"   default="./src/conductor/example/json/waypoints.json" />
-    <param name="waypoint_json_path"   value="$(arg waypoint_json_path)" />
-
-    <node pkg="conductor" type="robocup" name="robocup_guided_node" output="screen" respawn="true">
+    <node pkg="conductor" type="robocup" name="robocup_guided_node" required="$(eval not respawn_conductor)" clear_params="true" output="$(arg log_output)" respawn="$(arg respawn_conductor)">
+        <param name="transform_json_path" type="string" value="$(arg transform_json_path)" />
+        <param name="waypoint_json_path" type="string" value="$(arg waypoint_json_path)" />
+        <param name="startup_delay" type="double" value="$(arg startup_delay)" />
     </node>
 </launch>
