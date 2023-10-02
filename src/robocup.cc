@@ -98,22 +98,25 @@ int main(int argc, char **argv)
     // 创建 WaypointManager 实例，并从 JSON 文件读取航点数据
     WaypointManager waypointManager(waypoint_json_path);
 
+    // 输出坐标变换
     ROS_INFO(COLORED_TEXT("Showing frame info:", ANSI_COLOR_BLUE));
-
     while (ros::ok())
     {
         transformManager.printFrameInfoALL();
         break;
     }
 
+    // 检测 from body to camera_init 的变换是否存在
+    // 如果不存在就说明lio没有输出，就结束程序
     if (!transformManager.isWorldFrameExist())
     {
         return false;
     }
 
+    // 发布transform文件中的静态坐标变换
     transformManager.publishFrameAll();
 
-    ArduConductor apm(nh);
+    ArduConductor apm(nh, 20.0);
 
     // wait for FCU connection
     while (ros::ok() && !apm.current_state.connected && !is_interrupted)
@@ -150,7 +153,7 @@ int main(int argc, char **argv)
             break;
 
         case MissionState::kTakeoff:
-            if (apm.takeoff(0.5, 1.0, 2.0)) // 起飞到1m高度
+            if (apm.takeoff(0.5, 1.0, 3.0)) // 起飞到1m高度
             {
                 apm.mission_state = MissionState::kPose;
                 ros::Duration(2.0).sleep();
