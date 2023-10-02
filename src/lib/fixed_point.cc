@@ -15,7 +15,7 @@ void FixedPoint::subPointCallback(const geometry_msgs::Point::ConstPtr &msg)
     ROS_INFO(SUCCESS("\n--------------------------"));
     this->point_ = *msg;
     ROS_INFO(SUCCESS("\nGot point \nX: %0.2f\nY: %0.2f"), point_.x, point_.y);
-    auto offset = fixed_point::Point(point_.y - center_.y , point_.x - center_.x);
+    auto offset = fixed_point::Point(point_.y - center_.y, point_.x - center_.x);
     ROS_INFO(SUCCESS("\nOffset \nX: %0.2f\nY: %0.2f"), offset.x, offset.y);
     calcXYOutput(offset);
     ROS_INFO(SUCCESS("\nOutput \nX: %0.2f\nY: %0.2f"), last_output_.x, last_output_.y);
@@ -51,4 +51,28 @@ void FixedPoint::clear()
     last_output_.y = 0.0;
     pid_controller_x.clear();
     pid_controller_y.clear();
+}
+
+FixedPointYolo::FixedPointYolo(const std::string &topic, const std::string &yolo_tag, fixed_point::Point center, ros::NodeHandle &nh, const PidParams &params_x, const PidParams &params_y)
+    : FixedPoint(topic, center, nh, params_x, params_y), yolo_tag_(yolo_tag)
+{
+    point_yolo_sub_ = nh_.subscribe<conductor::yolo>(topic, 10, &FixedPoint::subPointCallback, this);
+}
+
+void FixedPointYolo::subPointYoloCallback(const conductor::yolo::ConstPtr &msg)
+{
+    // Opencv 坐标系 往右X增大 往下Y增大
+    // 飞机坐标系 X对应Opencv的-Y Y对应Opencv的-X
+    this->point_yolo_ = *msg;
+    if (point_yolo_.class_name == yolo_tag_)
+    {
+        ROS_INFO(SUCCESS("\n--------------------------"));
+        ROS_INFO(SUCCESS("\nGot a Yolo tag: %s"), point_yolo_.class_name.c_str());
+        ROS_INFO(SUCCESS("\npoint \nX: %0.2f\nY: %0.2f"), point_yolo_.center_x, point_yolo_.center_y);
+        auto offset = fixed_point::Point(point_yolo_.center_y - center_.y, point_yolo_.center_x - center_.x);
+        ROS_INFO(SUCCESS("\nOffset \nX: %0.2f\nY: %0.2f"), offset.x, offset.y);
+        calcXYOutput(offset);
+        ROS_INFO(SUCCESS("\nOutput \nX: %0.2f\nY: %0.2f"), last_output_.x, last_output_.y);
+        ROS_INFO(SUCCESS("\n--------------------------"));
+    }
 }

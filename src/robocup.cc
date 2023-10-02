@@ -17,7 +17,9 @@
 #include "conductor/mission_state.h"
 #include "conductor/ansi_color.h"
 #include "conductor/apm.h"
+#include "conductor/fixed_point.h"
 #include "conductor/waypoint.h"
+#include "conductor/yolo.h"
 
 #include <string.h>
 #include "signal.h" //necessary for the Custom SIGINT handler
@@ -132,6 +134,13 @@ int main(int argc, char **argv)
 
     ROS_INFO(SUCCESS("Drone connected!"));
 
+
+    PidParams pidpara{0.17, 0.0, 0.015, 10.0, 40, 0.0};
+    FixedPointYolo fixed_point_armor("filter_targets", "armor",
+                            {1280 / 2, 720 / 2}, nh,
+                            pidpara,
+                            pidpara);
+
     // 重置上一次操作的时间为当前时刻
     apm.last_request = ros::Time::now();
     int count = 0;
@@ -185,6 +194,16 @@ int main(int argc, char **argv)
                     apm.mission_state = MissionState::kLand;
                 }
             }
+            break;
+
+        case MissionState::kTarget:
+            
+            break;
+        
+        case MissionState::kWayback:
+            apm.setMoveSpeed(0.2); // 设置空速
+            apm.setPoseWorld(0.0, 0.0, 0.5, 0.0);
+            
             break;
 
         case MissionState::kLand:

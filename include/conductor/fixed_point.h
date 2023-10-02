@@ -5,6 +5,7 @@
 #include <ros/ros.h>
 #include "conductor/pid_controller.h"
 #include "conductor/bound.h"
+#include "conductor/yolo.h"
 
 namespace fixed_point
 {
@@ -55,7 +56,7 @@ public:
     
     ~FixedPoint(){};
 
-private:
+protected:
     ros::NodeHandle nh_;         // ROS 节点句柄
     ros::Subscriber point_sub_;  // 订阅器 - 目标点数据
     geometry_msgs::Point point_; // 目标点数据
@@ -67,6 +68,17 @@ private:
     fixed_point::Point output_bound_;
 
     void subPointCallback(const geometry_msgs::Point::ConstPtr &msg);
+};
+
+class FixedPointYolo : public FixedPoint
+{
+public:
+    FixedPointYolo(const std::string &topic, const std::string &yolo_tag, fixed_point::Point center, ros::NodeHandle &nh, const PidParams &params_x, const PidParams &params_y);
+protected:
+    ros::Subscriber point_yolo_sub_;  // 订阅器 - 自定义消息类型
+    conductor::yolo point_yolo_ ; // 目标点数据 - 自定义消息类型
+    std::string yolo_tag_; // 订阅的yolo标签
+    void subPointYoloCallback(const conductor::yolo::ConstPtr &msg); // 消息订阅回调函数
 };
 
 #endif // FIXED_POINT_H
