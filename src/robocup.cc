@@ -12,6 +12,7 @@
 #include <mavros_msgs/CommandTOL.h>
 #include <mavros_msgs/PositionTarget.h>
 #include <std_msgs/Float64.h>
+#include <std_msgs/String.h>
 #include <geometry_msgs/Point.h>
 
 #include "conductor/mission_state.h"
@@ -113,6 +114,8 @@ int main(int argc, char **argv)
     // startup delay
     ros::Duration(startup_delay).sleep();
 
+    ros::Publisher dropper_pub_ = nh.advertise<std_msgs::String>("dropper", 1);
+
     // 创建 FrameManager 实例，并从 JSON 文件读取坐标变换数据
     FrameManager transformManager(transform_json_path);
 
@@ -153,15 +156,15 @@ int main(int argc, char **argv)
 
     ROS_INFO(SUCCESS("Drone connected!"));
 
-    PidParams pidpara_armor{armor_kp, 0.0, armor_kd,      // kp, ki, kd
-                            10.0, 40, 0.0};               // windup_guard, output_bound, sample_time
-    FixedPointYolo fixed_point_armor("filter_targets",    // 订阅话题
+    PidParams pidpara_armor{armor_kp, 0.0, armor_kd,     // kp, ki, kd
+                            10.0, 40, 0.0};              // windup_guard, output_bound, sample_time
+    FixedPointYolo fixed_point_armor("filter_targets",   // 订阅话题
                                      "tent",             // 订阅Yolo标签
                                      {640 / 2, 640 / 2}, // 目标点
-                                     150.0,               // 锁定判定距离
-                                     nh,                  // 节点句柄
-                                     pidpara_armor,       // PID参数列表 x
-                                     pidpara_armor);      // PID参数列表 y
+                                     50.0,              // 锁定判定距离
+                                     nh,                 // 节点句柄
+                                     pidpara_armor,      // PID参数列表 x
+                                     pidpara_armor);     // PID参数列表 y
 
     // 重置上一次操作的时间为当前时刻
     apm.last_request = ros::Time::now();
@@ -227,9 +230,12 @@ int main(int argc, char **argv)
 
         case MissionState::kTarget:
             apm.setSpeedBody(fixed_point_armor.getBoundedOutput().x * 0.01, fixed_point_armor.getBoundedOutput().y * 0.01, 0, 0);
-            if (fixed_point_armor.locked_count_ > 180)
+            if (fixed_point_armor.locked_count_ > 100)
             {
-                apm.setSpeedBody(0.0, 0.0, 0.0, 0.0);       // 悬停
+                apm.setSpeedBody(0.0, 0.0, 0.0, 0.0); // 悬停
+                std_msgs::String msg;
+                msg.data = std::string("drop all");
+                dropper_pub_.publish(msg);
                 apm.mission_state = MissionState::kWayback; // 状态机切换
                 apm.updateLastRequestTime();
             }

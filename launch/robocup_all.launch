@@ -34,4 +34,7 @@
 
     <include file="$(find rknn_yolo)/launch/rknn_yolo.launch">
     </include>
+
+    <include file="$(find dropper)/launch/dropper.launch">
+    </include>
 </launch>
