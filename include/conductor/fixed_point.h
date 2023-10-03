@@ -53,7 +53,7 @@ public:
     PIDController pid_controller_x; // X轴PID控制器
     PIDController pid_controller_y; // Y轴PID控制器
     void clear();
-    
+
     ~FixedPoint(){};
 
 protected:
@@ -73,11 +73,14 @@ protected:
 class FixedPointYolo : public FixedPoint
 {
 public:
-    FixedPointYolo(const std::string &topic, const std::string &yolo_tag, fixed_point::Point center, ros::NodeHandle &nh, const PidParams &params_x, const PidParams &params_y);
+    FixedPointYolo(const std::string &topic, const std::string &yolo_tag, fixed_point::Point center, double lock_distance, ros::NodeHandle &nh, const PidParams &params_x, const PidParams &params_y);
+    bool is_found_;
+    int locked_count_;
+    double lock_distance_;
 protected:
-    ros::Subscriber point_yolo_sub_;  // 订阅器 - 自定义消息类型
-    conductor::yolo point_yolo_ ; // 目标点数据 - 自定义消息类型
-    std::string yolo_tag_; // 订阅的yolo标签
+    ros::Subscriber point_yolo_sub_;                                 // 订阅器 - 自定义消息类型
+    conductor::yolo point_yolo_;                                     // 目标点数据 - 自定义消息类型
+    std::string yolo_tag_;                                           // 订阅的yolo标签
     void subPointYoloCallback(const conductor::yolo::ConstPtr &msg); // 消息订阅回调函数
 };
 

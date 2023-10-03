@@ -56,6 +56,7 @@ int main(int argc, char **argv)
     signal(SIGINT, safeSigintHandler);
 
     double startup_delay = 0.0;
+    double armor_kp = 0.17, armor_kd = 0.015;
 
     std::string transform_json_path = "./src/conductor/example/json/transforms.json"; // 修改为你的 JSON 文件路径
 
@@ -88,6 +89,24 @@ int main(int argc, char **argv)
         else
         {
             ROS_WARN("Using default startup_delay: %f", startup_delay);
+        }
+
+        if (nh.getParam("/robocup_guided_node/armor_kp", armor_kp))
+        {
+            ROS_INFO("Get armor_kp parameter: %f", armor_kp);
+        }
+        else
+        {
+            ROS_WARN("Using default armor_kp: %f", armor_kp);
+        }
+
+        if (nh.getParam("/robocup_guided_node/armor_kd", armor_kd))
+        {
+            ROS_INFO("Get armor_kd parameter: %f", armor_kd);
+        }
+        else
+        {
+            ROS_WARN("Using default armor_kd: %f", armor_kd);
         }
     }
 
@@ -134,12 +153,15 @@ int main(int argc, char **argv)
 
     ROS_INFO(SUCCESS("Drone connected!"));
 
-
-    PidParams pidpara{0.17, 0.0, 0.015, 10.0, 40, 0.0};
-    FixedPointYolo fixed_point_armor("filter_targets", "armor",
-                            {1280 / 2, 720 / 2}, nh,
-                            pidpara,
-                            pidpara);
+    PidParams pidpara_armor{armor_kp, 0.0, armor_kd,      // kp, ki, kd
+                            10.0, 40, 0.0};               // windup_guard, output_bound, sample_time
+    FixedPointYolo fixed_point_armor("filter_targets",    // 订阅话题
+                                     "tent",             // 订阅Yolo标签
+                                     {640 / 2, 640 / 2}, // 目标点
+                                     150.0,               // 锁定判定距离
+                                     nh,                  // 节点句柄
+                                     pidpara_armor,       // PID参数列表 x
+                                     pidpara_armor);      // PID参数列表 y
 
     // 重置上一次操作的时间为当前时刻
     apm.last_request = ros::Time::now();
@@ -194,16 +216,30 @@ int main(int argc, char **argv)
                     apm.mission_state = MissionState::kLand;
                 }
             }
+
+            if (fixed_point_armor.is_found_) // 如果检测到
+            {
+                apm.setSpeedBody(0.0, 0.0, 0.0, 0.0);      // 悬停
+                fixed_point_armor.clear();                 // 重置PID控制器
+                apm.mission_state = MissionState::kTarget; // 状态机切换
+            }
             break;
 
         case MissionState::kTarget:
-            
+            apm.setSpeedBody(fixed_point_armor.getBoundedOutput().x * 0.01, fixed_point_armor.getBoundedOutput().y * 0.01, 0, 0);
+            if (fixed_point_armor.locked_count_ > 180)
+            {
+                apm.setSpeedBody(0.0, 0.0, 0.0, 0.0);       // 悬停
+                apm.mission_state = MissionState::kWayback; // 状态机切换
+                apm.updateLastRequestTime();
+            }
             break;
-        
+
         case MissionState::kWayback:
             apm.setMoveSpeed(0.2); // 设置空速
             apm.setPoseWorld(0.0, 0.0, 0.5, 0.0);
-            
+            apm.mission_state = MissionState::kLand; // 状态机切换
+            apm.updateLastRequestTime();
             break;
 
         case MissionState::kLand:

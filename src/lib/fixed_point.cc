@@ -5,7 +5,10 @@ FixedPoint::FixedPoint(const std::string &topic, fixed_point::Point center, ros:
     : center_(center), nh_(nh), pid_controller_x(params_x.kp, params_x.ki, params_x.kd, params_x.windup_guard, params_x.output_bound, params_x.sample_time),
       pid_controller_y(params_y.kp, params_y.ki, params_y.kd, params_y.windup_guard, params_y.output_bound, params_y.sample_time), output_bound_(params_x.output_bound, params_y.output_bound)
 {
-    point_sub_ = nh_.subscribe<geometry_msgs::Point>(topic, 10, &FixedPoint::subPointCallback, this);
+    if (topic != "none")
+    {
+        point_sub_ = nh_.subscribe<geometry_msgs::Point>(topic, 10, &FixedPoint::subPointCallback, this);
+    }
 }
 
 void FixedPoint::subPointCallback(const geometry_msgs::Point::ConstPtr &msg)
@@ -53,10 +56,10 @@ void FixedPoint::clear()
     pid_controller_y.clear();
 }
 
-FixedPointYolo::FixedPointYolo(const std::string &topic, const std::string &yolo_tag, fixed_point::Point center, ros::NodeHandle &nh, const PidParams &params_x, const PidParams &params_y)
-    : FixedPoint(topic, center, nh, params_x, params_y), yolo_tag_(yolo_tag)
+FixedPointYolo::FixedPointYolo(const std::string &topic, const std::string &yolo_tag, fixed_point::Point center, double lock_distance, ros::NodeHandle &nh, const PidParams &params_x, const PidParams &params_y)
+    : FixedPoint("none", center, nh, params_x, params_y), yolo_tag_(yolo_tag), is_found_(false), lock_distance_(lock_distance), locked_count_(0)
 {
-    point_yolo_sub_ = nh_.subscribe<conductor::yolo>(topic, 10, &FixedPoint::subPointCallback, this);
+    point_yolo_sub_ = nh_.subscribe<conductor::yolo>(topic, 10, &FixedPointYolo::subPointYoloCallback, this);
 }
 
 void FixedPointYolo::subPointYoloCallback(const conductor::yolo::ConstPtr &msg)
@@ -66,11 +69,22 @@ void FixedPointYolo::subPointYoloCallback(const conductor::yolo::ConstPtr &msg)
     this->point_yolo_ = *msg;
     if (point_yolo_.class_name == yolo_tag_)
     {
+        this->is_found_ = true;
         ROS_INFO(SUCCESS("\n--------------------------"));
         ROS_INFO(SUCCESS("\nGot a Yolo tag: %s"), point_yolo_.class_name.c_str());
         ROS_INFO(SUCCESS("\npoint \nX: %0.2f\nY: %0.2f"), point_yolo_.center_x, point_yolo_.center_y);
         auto offset = fixed_point::Point(point_yolo_.center_y - center_.y, point_yolo_.center_x - center_.x);
-        ROS_INFO(SUCCESS("\nOffset \nX: %0.2f\nY: %0.2f"), offset.x, offset.y);
+        double distance_ = std::sqrt(offset.x * offset.x + offset.y * offset.y);
+        if (distance_ < lock_distance_)
+        {
+            locked_count_++;
+            ROS_INFO(SUCCESS("\nOffset \nX: %0.2f\nY: %0.2f, distance: %0.2f"), offset.x, offset.y, distance_);
+        }
+        else
+        {
+            locked_count_ = 0;
+            ROS_INFO(COLORED_TEXT("\nOffset \nX: %0.2f\nY: %0.2f, distance: %0.2f", ANSI_BACKGROUND_RED), offset.x, offset.y, distance_);
+        }
         calcXYOutput(offset);
         ROS_INFO(SUCCESS("\nOutput \nX: %0.2f\nY: %0.2f"), last_output_.x, last_output_.y);
         ROS_INFO(SUCCESS("\n--------------------------"));

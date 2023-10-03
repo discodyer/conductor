@@ -6,6 +6,8 @@
     <arg name="log_output" default="screen" />
     <arg name="respawn_conductor" default="false" />
     <arg name="startup_delay" default="10" />
+    <arg name="armor_kp" default="0.17" />
+    <arg name="armor_kd" default="0.015" />
 
     <include file="$(find conductor)/launch/robocup.launch">
         <arg name="transform_json_path" value="$(arg transform_json_path)" />
@@ -13,6 +15,9 @@
         <arg name="log_output" value="$(arg log_output)" />
         <arg name="respawn_conductor" value="$(arg respawn_conductor)" />
         <arg name="startup_delay" value="$(arg startup_delay)" />
+        <arg name="armor_kp" value="$(arg armor_kp)" />
+        <arg name="armor_kd" value="$(arg armor_kd)" />
+
     </include>
 
     <include file="$(find mavros)/launch/apm.launch">
@@ -25,5 +30,8 @@
     </include>
 
     <include file="$(find vision_to_mavros)/launch/mid360_to_mavros.launch">
+    </include>
+
+    <include file="$(find rknn_yolo)/launch/rknn_yolo.launch">
     </include>
 </launch>
