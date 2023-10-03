@@ -21,6 +21,7 @@
 #include "conductor/fixed_point.h"
 #include "conductor/waypoint.h"
 #include "conductor/yolo.h"
+#include "conductor/dropper.h"
 
 #include <string.h>
 #include "signal.h" //necessary for the Custom SIGINT handler
@@ -57,7 +58,8 @@ int main(int argc, char **argv)
     signal(SIGINT, safeSigintHandler);
 
     double startup_delay = 0.0;
-    double armor_kp = 0.17, armor_kd = 0.015;
+    PidParams pidpara_armor{0.17, 0.0, 0.015, // kp, ki, kd
+                            10.0, 40, 0.0};   // windup_guard, output_bound, sample_time
 
     std::string transform_json_path = "./src/conductor/example/json/transforms.json"; // 修改为你的 JSON 文件路径
 
@@ -92,29 +94,29 @@ int main(int argc, char **argv)
             ROS_WARN("Using default startup_delay: %f", startup_delay);
         }
 
-        if (nh.getParam("/robocup_guided_node/armor_kp", armor_kp))
+        if (nh.getParam("/robocup_guided_node/armor_kp", pidpara_armor.kp))
         {
-            ROS_INFO("Get armor_kp parameter: %f", armor_kp);
+            ROS_INFO("Get armor_kp parameter: %f", pidpara_armor.kp);
         }
         else
         {
-            ROS_WARN("Using default armor_kp: %f", armor_kp);
+            ROS_WARN("Using default armor_kp: %f", pidpara_armor.kp);
         }
 
-        if (nh.getParam("/robocup_guided_node/armor_kd", armor_kd))
+        if (nh.getParam("/robocup_guided_node/armor_kd", pidpara_armor.kd))
         {
-            ROS_INFO("Get armor_kd parameter: %f", armor_kd);
+            ROS_INFO("Get armor_kd parameter: %f", pidpara_armor.kd);
         }
         else
         {
-            ROS_WARN("Using default armor_kd: %f", armor_kd);
+            ROS_WARN("Using default armor_kd: %f", pidpara_armor.kd);
         }
     }
 
     // startup delay
     ros::Duration(startup_delay).sleep();
 
-    ros::Publisher dropper_pub_ = nh.advertise<std_msgs::String>("dropper", 1);
+    Dropper dropper(nh);
 
     // 创建 FrameManager 实例，并从 JSON 文件读取坐标变换数据
     FrameManager transformManager(transform_json_path);
@@ -123,7 +125,6 @@ int main(int argc, char **argv)
     WaypointManager waypointManager(waypoint_json_path);
 
     // 输出坐标变换
-    ROS_INFO(COLORED_TEXT("Showing frame info:", ANSI_COLOR_BLUE));
     while (ros::ok())
     {
         transformManager.printFrameInfoALL();
@@ -156,12 +157,10 @@ int main(int argc, char **argv)
 
     ROS_INFO(SUCCESS("Drone connected!"));
 
-    PidParams pidpara_armor{armor_kp, 0.0, armor_kd,     // kp, ki, kd
-                            10.0, 40, 0.0};              // windup_guard, output_bound, sample_time
     FixedPointYolo fixed_point_armor("filter_targets",   // 订阅话题
                                      "tent",             // 订阅Yolo标签
                                      {640 / 2, 640 / 2}, // 目标点
-                                     50.0,              // 锁定判定距离
+                                     50.0,               // 锁定判定距离
                                      nh,                 // 节点句柄
                                      pidpara_armor,      // PID参数列表 x
                                      pidpara_armor);     // PID参数列表 y
@@ -200,14 +199,8 @@ int main(int argc, char **argv)
         case MissionState::kPose:
             if (!waypointManager.is_current_waypoint_published_)
             {
-                waypoint::Waypoint current_waypoint = waypointManager.getCurrentWaypoint();
-                waypoint::Waypoint world_waypoint = transformManager.getWorldWaypoint(current_waypoint);
                 waypointManager.printCurrentWaypoint();
-                apm.setMoveSpeed(world_waypoint.air_speed); // 设置空速
-                apm.setPoseWorld(world_waypoint.position.x,
-                                 world_waypoint.position.y,
-                                 world_waypoint.position.z,
-                                 world_waypoint.yaw);
+                apm.setWaypointPoseWorld(transformManager.getWorldWaypoint(waypointManager.getCurrentWaypoint()));
                 waypointManager.is_current_waypoint_published_ = true;
             }
 
@@ -222,7 +215,7 @@ int main(int argc, char **argv)
 
             if (fixed_point_armor.is_found_) // 如果检测到
             {
-                apm.setSpeedBody(0.0, 0.0, 0.0, 0.0);      // 悬停
+                apm.setBreak();                            // 悬停
                 fixed_point_armor.clear();                 // 重置PID控制器
                 apm.mission_state = MissionState::kTarget; // 状态机切换
             }
@@ -232,10 +225,8 @@ int main(int argc, char **argv)
             apm.setSpeedBody(fixed_point_armor.getBoundedOutput().x * 0.01, fixed_point_armor.getBoundedOutput().y * 0.01, 0, 0);
             if (fixed_point_armor.locked_count_ > 100)
             {
-                apm.setSpeedBody(0.0, 0.0, 0.0, 0.0); // 悬停
-                std_msgs::String msg;
-                msg.data = std::string("drop all");
-                dropper_pub_.publish(msg);
+                apm.setBreak(); // 悬停
+                dropper.dropAll();
                 apm.mission_state = MissionState::kWayback; // 状态机切换
                 apm.updateLastRequestTime();
             }

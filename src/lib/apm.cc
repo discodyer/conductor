@@ -141,7 +141,7 @@ void ArduConductor::setPoseBody(double x, double y, double z, double yaw)
 /// @brief 悬停
 void ArduConductor::setBreak()
 {
-	setPoseBody(0, 0, 0, 0);
+	setSpeedBody(0.0, 0.0, 0.0, 0.0);
 }
 
 void ArduConductor::initNode()
@@ -156,6 +156,14 @@ void ArduConductor::setPoseRelated(double x, double y, double z, double yaw)
 void ArduConductor::setPoseWorld(double x, double y, double z, double yaw) const
 {
 	sendTranslatedPoseWorld(x, y, z, yaw);
+}
+void ArduConductor::setWaypointPoseWorld(waypoint::Waypoint waypoint)
+{
+	this->setMoveSpeed(waypoint.air_speed);
+	this->setPoseWorld(waypoint.position.x,
+					   waypoint.position.y,
+					   waypoint.position.z,
+					   waypoint.yaw);
 }
 
 void ArduConductor::sendTranslatedPoseWorld(double x, double y, double z, double yaw) const
@@ -285,9 +293,9 @@ bool ArduConductor::takeoff(double pre_takeoff_alt, double altitude, double dela
 	{
 		this->setMoveSpeed(0.2); // 设置空速
 		this->setPoseWorld(0,
-						 0,
-						 altitude,
-						 0);
+						   0,
+						   altitude,
+						   0);
 
 		ROS_INFO(SUCCESS("Vehicle Takeoff to world_frame altitude: %0.2f"), altitude);
 		updateLastRequestTime();
