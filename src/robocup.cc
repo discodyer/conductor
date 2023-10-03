@@ -200,15 +200,19 @@ int main(int argc, char **argv)
             if (!waypointManager.is_current_waypoint_published_)
             {
                 waypointManager.printCurrentWaypoint();
-                apm.setWaypointPoseWorld(transformManager.getWorldWaypoint(waypointManager.getCurrentWaypoint()));
+                apm.setWaypointPoseWorld(
+                    transformManager.getWorldWaypoint(
+                        waypointManager.getCurrentWaypoint()));
                 waypointManager.is_current_waypoint_published_ = true;
             }
 
-            if (waypointManager.isWaypointDelaySatisfied())
+            if (waypointManager.isWaypointDelaySatisfied() ||
+                waypoint::calculateDistance(transformManager.getCurrentPoseWorld(),
+                                            waypointManager.getCurrentWaypoint()) < 0.05)
             {
                 if (!waypointManager.goToNextWaypoint())
                 {
-                    apm.last_request = ros::Time::now();
+                    apm.updateLastRequestTime();
                     apm.mission_state = MissionState::kLand;
                 }
             }
@@ -222,7 +226,9 @@ int main(int argc, char **argv)
             break;
 
         case MissionState::kTarget:
-            apm.setSpeedBody(fixed_point_armor.getBoundedOutput().x * 0.01, fixed_point_armor.getBoundedOutput().y * 0.01, 0, 0);
+            apm.setSpeedBody(fixed_point_armor.getBoundedOutput().x * 0.01,
+                             fixed_point_armor.getBoundedOutput().y * 0.01,
+                             0, 0);
             if (fixed_point_armor.locked_count_ > 100)
             {
                 apm.setBreak(); // 悬停

@@ -177,7 +177,7 @@ bool WaypointManager::goToNextWaypoint()
         ros::Time current_time = ros::Time::now();
 
         // 判断是否满足航点延时
-        if ((current_time - last_waypoint_time_).toSec() >= waypoints_[current_waypoint_index_].delay)
+        // if ((current_time - last_waypoint_time_).toSec() >= waypoints_[current_waypoint_index_].delay)
         {
             // 更新上一次航点发布的时间戳
             last_waypoint_time_ = current_time;
@@ -540,4 +540,34 @@ waypoint::Waypoint FrameManager::getWorldWaypoint(waypoint::Waypoint waypoint, c
     mat.getEulerYPR(rotation_yaw, rotation_pitch, rotation_roll);
     waypoint_world.yaw = waypoint.yaw + rotation_yaw;
     return waypoint_world;
+}
+
+waypoint::Waypoint FrameManager::getCurrentPoseWorld(double delay, double air_speed)
+{
+    waypoint::Waypoint waypoint_world{0, waypoint::WaypointType::kPoseAbsolute, "world", {0, 0, 0}, 0, delay, air_speed};
+    tf2::Transform transform_body_to_world = getTransform("world", "body");
+    tf2::Vector3 position_orig = transform_body_to_world.getOrigin();
+    waypoint_world.position.x = position_orig.getX();
+    waypoint_world.position.y = position_orig.getY();
+    waypoint_world.position.z = position_orig.getZ();
+    tf2::Matrix3x3 mat(transform_body_to_world.getRotation());
+    double rotation_yaw, rotation_pitch, rotation_roll;
+    mat.getEulerYPR(rotation_yaw, rotation_pitch, rotation_roll);
+    waypoint_world.yaw = rotation_yaw;
+    return waypoint_world;
+}
+
+waypoint::Waypoint FrameManager::getCurrentPoseWorld(waypoint::Waypoint waypoint)
+{
+    return getCurrentPoseWorld(waypoint.delay, waypoint.air_speed);
+}
+
+double waypoint::calculateDistance(const Waypoint &A, const Waypoint &B)
+{
+    double dx = B.position.x - A.position.x;
+    double dy = B.position.y - A.position.y;
+    double dz = B.position.z - A.position.z;
+    double distance = std::sqrt(dx * dx + dy * dy + dz * dz);
+    ROS_INFO("distance: %0.2f", distance);
+    return distance;
 }

@@ -21,7 +21,7 @@ namespace waypoint
     {
         kPoseAbsolute, // 全局坐标航点
         kPoseRelated,  // 相对坐标航点
-        kSpecial,   // 特殊航点，需要执行子状态机任务
+        kSpecial,      // 特殊航点，需要执行子状态机任务
     };
 
     // 三维向量模板类
@@ -75,6 +75,8 @@ namespace waypoint
         double delay;         // 航点延时，单位：秒
         double air_speed;     // 空速
     };
+
+    double calculateDistance(const Waypoint &A, const Waypoint &B);
 }
 
 class WaypointManager
@@ -122,7 +124,7 @@ public:
     bool isWorldFrameExist() const;
 
     std::string getWorldFrameID() const;
-    
+
     // 判断是否存在坐标系
     bool isFrameExist(const std::string &target_frame_id) const;
 
@@ -135,6 +137,9 @@ public:
 
     void printFrameInfo(const waypoint::FrameTransform &frame) const;
     void printFrameInfoALL() const;
+
+    waypoint::Waypoint getCurrentPoseWorld(double delay = 5, double air_speed = 0.2);
+    waypoint::Waypoint getCurrentPoseWorld(waypoint::Waypoint waypoint);
 
     tf2::Transform getTransform(const std::string &target_frame_id, const std::string &source_frame_id);
     waypoint::Waypoint getWorldWaypoint(waypoint::Waypoint waypoint, const std::string &world_frame_id = "world");
