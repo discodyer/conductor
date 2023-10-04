@@ -74,6 +74,18 @@ namespace waypoint
         double yaw;           // 航点朝向
         double delay;         // 航点延时，单位：秒
         double air_speed;     // 空速
+        double range;         // 目标范围
+        std::string info;     // 航点注释
+        bool is_published;    // 是否被发布过
+
+        // 默认构造函数
+        Waypoint(size_t index = 0, WaypointType type = WaypointType::kPoseAbsolute,
+                 std::string frame_id = "world", Position position = {0.0, 0.0, 0.0},
+                 double yaw = 0.0, double delay = 5.0, double air_speed = 0.2,
+                 double range = 0.05, std::string info = "none", bool is_published = false)
+            : index(index), type(type), frame_id(frame_id), position(position),
+              yaw(yaw), delay(delay), air_speed(air_speed), range(range), info(info),
+              is_published(is_published) {}
     };
 
     double calculateDistance(const Waypoint &A, const Waypoint &B);
@@ -93,7 +105,9 @@ public:
     bool goToNextWaypoint();
 
     // 获取当前航点信息
-    waypoint::Waypoint getCurrentWaypoint() const;
+    waypoint::Waypoint getCurrentTargetWaypoint() const;
+
+    void setCurrentTargetWaypointIsPublished(bool is_published);
 
     // 判断是否满足航点延时
     bool isWaypointDelaySatisfied() const;
@@ -105,7 +119,7 @@ public:
     void printCurrentWaypoint() const;
     void printCurrentWaypointLoop();
 
-    bool is_current_waypoint_published_;
+    bool is_current_waypoint_published_; // outdated
 
     std::string getTypeString(waypoint::WaypointType type) const;
 

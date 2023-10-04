@@ -197,21 +197,23 @@ int main(int argc, char **argv)
             break;
 
         case MissionState::kPose:
-            if (!waypointManager.is_current_waypoint_published_)
+            if (!waypointManager.getCurrentTargetWaypoint().is_published)
             {
                 waypointManager.printCurrentWaypoint();
                 apm.setWaypointPoseWorld(
                     transformManager.getWorldWaypoint(
-                        waypointManager.getCurrentWaypoint()));
-                waypointManager.is_current_waypoint_published_ = true;
+                        waypointManager.getCurrentTargetWaypoint()));
+                waypointManager.setCurrentTargetWaypointIsPublished(true);
             }
 
-            if (waypointManager.isWaypointDelaySatisfied() ||
+            if (waypointManager.isWaypointDelaySatisfied() || // 判断航点是否超时
                 waypoint::calculateDistance(transformManager.getCurrentPoseWorld(),
-                                            waypointManager.getCurrentWaypoint()) < 0.05)
+                                            waypointManager.getCurrentTargetWaypoint()) <
+                    waypointManager.getCurrentTargetWaypoint().range) // 判断是否到达目标点附近
             {
                 if (!waypointManager.goToNextWaypoint())
                 {
+                    ROS_INFO(SUCCESS("Finish Loading Waypoint !"));
                     apm.updateLastRequestTime();
                     apm.mission_state = MissionState::kLand;
                 }

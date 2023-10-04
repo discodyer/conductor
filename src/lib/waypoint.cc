@@ -42,7 +42,7 @@ WaypointManager::WaypointManager(const std::string &jsonFilePath)
         }
 
         // 解析航点数据
-        waypoint::Waypoint waypoint{i, waypoint::WaypointType::kPoseAbsolute, "camera_init", {0, 0, 0}, 0, 0, 0};
+        waypoint::Waypoint waypoint(i);
         if (waypointData.HasMember("type") && waypointData["type"].IsString())
         {
             const std::string &typeStr = waypointData["type"].GetString();
@@ -143,6 +143,25 @@ WaypointManager::WaypointManager(const std::string &jsonFilePath)
             continue;
         }
 
+        if (waypointData.HasMember("range") && waypointData["range"].IsDouble())
+        {
+            waypoint.range = waypointData["range"].GetDouble();
+        }
+        else
+        {
+            ROS_WARN("Range data not found or not a double. Using default: %0.2f.", waypoint.range);
+        }
+
+        if (waypointData.HasMember("info") && waypointData["info"].IsString())
+        {
+            const std::string &typeStr = waypointData["info"].GetString();
+            waypoint.info = typeStr;
+        }
+        else
+        {
+            ROS_WARN("Waypoint info not found or not a string.");
+        }
+
         tempWaypoints.push_back(waypoint);
     }
     // 对航点数据按照索引进行排序
@@ -173,26 +192,25 @@ bool WaypointManager::goToNextWaypoint()
 {
     if (current_waypoint_index_ < waypoints_.size() - 1)
     {
-        // 获取当前时间戳
-        ros::Time current_time = ros::Time::now();
+        // 更新上一次航点发布的时间戳
+        last_waypoint_time_ = ros::Time::now();
 
-        // 判断是否满足航点延时
-        // if ((current_time - last_waypoint_time_).toSec() >= waypoints_[current_waypoint_index_].delay)
-        {
-            // 更新上一次航点发布的时间戳
-            last_waypoint_time_ = current_time;
+        // 转到下一个航点
+        current_waypoint_index_++;
 
-            // 转到下一个航点
-            current_waypoint_index_++;
-
-            is_current_waypoint_published_ = false;
-            return true;
-        }
+        is_current_waypoint_published_ = false; // outdated
+        return true;
     }
     return false;
 }
 
-waypoint::Waypoint WaypointManager::getCurrentWaypoint() const
+void WaypointManager::setCurrentTargetWaypointIsPublished(bool is_published)
+{
+    waypoints_[current_waypoint_index_].is_published = is_published;
+    is_current_waypoint_published_ = is_published; // outdated
+}
+
+waypoint::Waypoint WaypointManager::getCurrentTargetWaypoint() const
 {
     if (current_waypoint_index_ < waypoints_.size())
     {
@@ -262,12 +280,14 @@ void WaypointManager::printCurrentWaypoint() const
         const waypoint::Waypoint &waypoint = waypoints_[current_waypoint_index_];
         ROS_INFO("Current Waypoint Information:");
         ROS_INFO("Index: %zu", waypoint.index);
+        ROS_INFO("Info: %s", waypoint.info.c_str());
         ROS_INFO("Type: %s", getTypeString(waypoint.type).c_str());
         ROS_INFO("frame_id: %s", waypoint.frame_id.c_str());
         ROS_INFO("Position: x= %f, y= %f, z= %f", waypoint.position.x, waypoint.position.y, waypoint.position.z);
         ROS_INFO("Yaw: %f", waypoint.yaw);
         ROS_INFO("Delay: %f", waypoint.delay);
         ROS_INFO("Air Speed: %f", waypoint.air_speed);
+        ROS_INFO("Range: %f", waypoint.range);
         ROS_INFO(COLORED_TEXT("-----------------------------", "\033[1m"));
     }
     else
@@ -280,9 +300,9 @@ void WaypointManager::printCurrentWaypointLoop()
 {
     if (current_waypoint_index_ < waypoints_.size())
     {
-        if (!is_current_waypoint_published_)
+        if (!waypoints_[current_waypoint_index_].is_published)
         {
-            const waypoint::Waypoint &waypoint = waypoints_[current_waypoint_index_];
+            waypoint::Waypoint &waypoint = waypoints_[current_waypoint_index_];
             ROS_INFO("Current Waypoint Information:");
             ROS_INFO("Index: %zu", waypoint.index);
             ROS_INFO("Type: %s", getTypeString(waypoint.type).c_str());
@@ -292,7 +312,7 @@ void WaypointManager::printCurrentWaypointLoop()
             ROS_INFO("Delay: %f", waypoint.delay);
             ROS_INFO("Air Speed: %f", waypoint.air_speed);
             ROS_INFO(COLORED_TEXT("-----------------------------", "\033[1m"));
-            is_current_waypoint_published_ = true;
+            waypoint.is_published = true;
         }
     }
     else
@@ -529,7 +549,9 @@ tf2::Transform FrameManager::getTransform(const std::string &target_frame_id, co
 
 waypoint::Waypoint FrameManager::getWorldWaypoint(waypoint::Waypoint waypoint, const std::string &world_frame_id)
 {
-    waypoint::Waypoint waypoint_world{0, waypoint::WaypointType::kPoseAbsolute, "world", {0, 0, 0}, 0, waypoint.delay, waypoint.air_speed};
+    waypoint::Waypoint waypoint_world;
+    waypoint_world.delay = waypoint.delay;
+    waypoint_world.air_speed = waypoint.air_speed;
     tf2::Transform transform_to_world = getTransform("world", waypoint.frame_id);
     tf2::Vector3 position_orig = transform_to_world.getOrigin();
     waypoint_world.position.x = waypoint.position.x + position_orig.getX();
@@ -544,7 +566,9 @@ waypoint::Waypoint FrameManager::getWorldWaypoint(waypoint::Waypoint waypoint, c
 
 waypoint::Waypoint FrameManager::getCurrentPoseWorld(double delay, double air_speed)
 {
-    waypoint::Waypoint waypoint_world{0, waypoint::WaypointType::kPoseAbsolute, "world", {0, 0, 0}, 0, delay, air_speed};
+    waypoint::Waypoint waypoint_world;
+    waypoint_world.delay = delay;
+    waypoint_world.air_speed = air_speed;
     tf2::Transform transform_body_to_world = getTransform("world", "body");
     tf2::Vector3 position_orig = transform_body_to_world.getOrigin();
     waypoint_world.position.x = position_orig.getX();
@@ -568,6 +592,5 @@ double waypoint::calculateDistance(const Waypoint &A, const Waypoint &B)
     double dy = B.position.y - A.position.y;
     double dz = B.position.z - A.position.z;
     double distance = std::sqrt(dx * dx + dy * dy + dz * dz);
-    ROS_INFO("distance: %0.2f", distance);
     return distance;
 }

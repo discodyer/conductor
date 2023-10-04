@@ -118,9 +118,9 @@ int main(int argc, char **argv)
             break;
 
         case MissionState::kPose:
-            if (!waypointManager.is_current_waypoint_published_)
+            if (!waypointManager.is_current_waypoint_published_) // outdated
             {
-                waypoint::Waypoint current_waypoint = waypointManager.getCurrentWaypoint();
+                waypoint::Waypoint current_waypoint = waypointManager.getCurrentTargetWaypoint();
                 waypoint::Waypoint world_waypoint = transformManager.getWorldWaypoint(current_waypoint);
                 waypointManager.printCurrentWaypoint();
                 apm.setMoveSpeed(world_waypoint.air_speed); // 设置空速
@@ -128,7 +128,7 @@ int main(int argc, char **argv)
                                 world_waypoint.position.y,
                                 world_waypoint.position.z,
                                 world_waypoint.yaw);
-                waypointManager.is_current_waypoint_published_ = true;
+                waypointManager.is_current_waypoint_published_ = true; // outdated
             }
 
             if (waypointManager.isWaypointDelaySatisfied())

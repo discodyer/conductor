@@ -2,6 +2,7 @@
     "waypoints": [
         {
             "index": 0,
+            "info": "start",
             "type": "PoseAbsolute",
             "frame_id": "map",
             "position": {
@@ -11,10 +12,12 @@
             },
             "yaw": 0.0,
             "delay": 5.0,
-            "air_speed": 0.2
+            "air_speed": 0.2,
+            "range" : 0.05
         },
         {
             "index": 1,
+            "info": "move forward 0.5",
             "type": "PoseAbsolute",
             "frame_id": "map",
             "position": {
@@ -24,7 +27,8 @@
             },
             "yaw": 0.0,
             "delay": 5.0,
-            "air_speed": 0.2
+            "air_speed": 0.2,
+            "range" : 0.05
         },
         {
             "index": 2,
