@@ -35,6 +35,7 @@ public:
     void setPoseBody(double x, double y, double z, double yaw);
     void setPoseRelated(double x, double y, double z, double yaw);
     void setPoseWorld(double x, double y, double z, double yaw) const;
+    void setPoseWorld(waypoint::Waypoint waypoint);
     void setWaypointPoseWorld(waypoint::Waypoint waypoint);
     void sendTranslatedPoseWorld(double x, double y, double z, double yaw) const;
     void setBreak();

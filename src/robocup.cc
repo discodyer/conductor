@@ -157,13 +157,24 @@ int main(int argc, char **argv)
 
     ROS_INFO(SUCCESS("Drone connected!"));
 
-    FixedPointYolo fixed_point_armor("filter_targets",   // 订阅话题
-                                     "tent",             // 订阅Yolo标签
-                                     {640 / 2, 640 / 2}, // 目标点
-                                     50.0,               // 锁定判定距离
-                                     nh,                 // 节点句柄
-                                     pidpara_armor,      // PID参数列表 x
-                                     pidpara_armor);     // PID参数列表 y
+    FixedPointYolo fixedPointArmor("filter_targets",   // 订阅话题
+                                   "tent",             // 订阅Yolo标签
+                                   {640 / 2, 640 / 2}, // 目标点
+                                   50.0,               // 锁定判定距离
+                                   nh,                 // 节点句柄
+                                   pidpara_armor,      // PID参数列表 x
+                                   pidpara_armor,      // PID参数列表 y
+                                   100                 // 锁定计数
+    );
+
+    waypoint::Waypoint waypoint_snapshot_break;             // 中断时航点
+    waypoint::Waypoint waypoint_snapshot_break_destination; // 中断时目标航点
+
+    waypoint::Waypoint waypoint_snapshot_target;                    // 目标点悬停位置（参考摄像头中心）
+    waypoint::Waypoint waypoint_snapshot_drop_waypoint;             // 目标投放位置
+    waypoint::Position waypoint_dropper_1_offset{0.2, -0.3, -0.08}; // 1号左侧投掷物偏移
+    waypoint::Position waypoint_dropper_2_offset{0.1, 0.0, 0.3};    // 2号中间投掷物偏移
+    waypoint::Position waypoint_dropper_3_offset{0.0, 0.1, 0.3};    // 3号右侧投掷物偏移
 
     // 重置上一次操作的时间为当前时刻
     apm.last_request = ros::Time::now();
@@ -197,18 +208,20 @@ int main(int argc, char **argv)
             break;
 
         case MissionState::kPose:
-            if (!waypointManager.getCurrentTargetWaypoint().is_published)
+            if (!waypointManager.getCurrentTargetWaypoint().is_published) // 发布下一个航点
             {
                 waypointManager.printCurrentWaypoint();
-                apm.setWaypointPoseWorld(
+                apm.setPoseWorld(
                     transformManager.getWorldWaypoint(
                         waypointManager.getCurrentTargetWaypoint()));
                 waypointManager.setCurrentTargetWaypointIsPublished(true);
             }
 
             if (waypointManager.isWaypointDelaySatisfied() || // 判断航点是否超时
-                waypoint::calculateDistance(transformManager.getCurrentPoseWorld(),
-                                            waypointManager.getCurrentTargetWaypoint()) <
+                waypoint::calculateDistance(
+                    transformManager.getCurrentPoseWorld(),
+                    transformManager.getWorldWaypoint(
+                        waypointManager.getCurrentTargetWaypoint())) <
                     waypointManager.getCurrentTargetWaypoint().range) // 判断是否到达目标点附近
             {
                 if (!waypointManager.goToNextWaypoint())
@@ -219,25 +232,66 @@ int main(int argc, char **argv)
                 }
             }
 
-            if (fixed_point_armor.is_found_) // 如果检测到
+            if (fixedPointArmor.is_found_ && !fixedPointArmor.is_dropped_) // 如果检测到目标点
             {
-                apm.setBreak();                            // 悬停
-                fixed_point_armor.clear();                 // 重置PID控制器
-                apm.mission_state = MissionState::kTarget; // 状态机切换
+                apm.setBreak();          // 悬停
+                fixedPointArmor.clear(); // 重置PID控制器
+                waypoint_snapshot_break_destination = transformManager.getWorldWaypoint(
+                    waypointManager.getCurrentTargetWaypoint());                  // 记录当前目标航点
+                waypoint_snapshot_break = transformManager.getCurrentPoseWorld(); // 记录中断位置
+                apm.mission_state = MissionState::kTarget;                        // 状态机切换
             }
             break;
 
         case MissionState::kTarget:
-            apm.setSpeedBody(fixed_point_armor.getBoundedOutput().x * 0.01,
-                             fixed_point_armor.getBoundedOutput().y * 0.01,
-                             0, 0);
-            if (fixed_point_armor.locked_count_ > 100)
+            if (!fixedPointArmor.is_lock_counter_reached() && !fixedPointArmor.is_locked_)
             {
-                apm.setBreak(); // 悬停
-                dropper.dropAll();
+                apm.setSpeedBody(fixedPointArmor.getBoundedOutput().x * 0.01,
+                                 fixedPointArmor.getBoundedOutput().y * 0.01,
+                                 0, 0);
+                break;
+            }
+
+            if (fixedPointArmor.is_lock_counter_reached() && !fixedPointArmor.is_locked_)
+            {
+                apm.setBreak();
+                fixedPointArmor.is_locked_ = true;
+                ROS_INFO("is_lock_counter_reached");
+                // 记录目标点悬停位置（参考摄像头中心）
+                waypoint_snapshot_target = transformManager.getCurrentPoseWorld();
+                // 移动到偏移位置
+                waypoint_snapshot_drop_waypoint = waypoint_snapshot_target;
+                waypoint_snapshot_drop_waypoint.position.x += waypoint_dropper_1_offset.x;
+                waypoint_snapshot_drop_waypoint.position.y += waypoint_dropper_1_offset.y;
+                waypoint_snapshot_drop_waypoint.position.z = waypoint_dropper_1_offset.z;
+                waypoint_snapshot_drop_waypoint.air_speed = 0.1;
+                apm.setPoseWorld(waypoint_snapshot_drop_waypoint);
+                apm.updateLastRequestTime();
+                break;
+            }
+
+            if (fixedPointArmor.is_locked_ &&
+                !fixedPointArmor.is_dropped_ &&
+                (apm.isTimeElapsed(5.0) ||
+                 (waypoint::calculateDistance(
+                      transformManager.getCurrentPoseWorld(),
+                      waypoint_snapshot_drop_waypoint) <=
+                  0.05))) // 判断是否到达目标点附近
+            {
+                ROS_INFO("is_dropped_");
+                apm.setBreak();    // 悬停
+                dropper.dropAll(); // 投掷左侧
+                fixedPointArmor.is_dropped_ = true;
                 apm.mission_state = MissionState::kWayback; // 状态机切换
                 apm.updateLastRequestTime();
             }
+            else
+            {
+                ROS_INFO(COLORED_TEXT("distance: %0.2f", ANSI_BACKGROUND_RED), waypoint::calculateDistance(
+                                                                                   transformManager.getCurrentPoseWorld(),
+                                                                                   waypoint_snapshot_drop_waypoint));
+            }
+
             break;
 
         case MissionState::kWayback:

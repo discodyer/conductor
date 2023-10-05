@@ -157,6 +157,12 @@ void ArduConductor::setPoseWorld(double x, double y, double z, double yaw) const
 {
 	sendTranslatedPoseWorld(x, y, z, yaw);
 }
+
+void ArduConductor::setPoseWorld(waypoint::Waypoint waypoint)
+{
+	setWaypointPoseWorld(waypoint);
+}
+
 void ArduConductor::setWaypointPoseWorld(waypoint::Waypoint waypoint)
 {
 	this->setMoveSpeed(waypoint.air_speed);

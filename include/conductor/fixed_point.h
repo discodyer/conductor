@@ -73,9 +73,13 @@ protected:
 class FixedPointYolo : public FixedPoint
 {
 public:
-    FixedPointYolo(const std::string &topic, const std::string &yolo_tag, fixed_point::Point center, double lock_distance, ros::NodeHandle &nh, const PidParams &params_x, const PidParams &params_y);
+    FixedPointYolo(const std::string &topic, const std::string &yolo_tag, fixed_point::Point center, double lock_distance, ros::NodeHandle &nh, const PidParams &params_x, const PidParams &params_y, int lock_cutoff);
     bool is_found_;
+    bool is_dropped_;
+    bool is_locked_;
+    bool is_lock_counter_reached();
     int locked_count_;
+    int lock_cutoff_;
     double lock_distance_;
 protected:
     ros::Subscriber point_yolo_sub_;                                 // 订阅器 - 自定义消息类型

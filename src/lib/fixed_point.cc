@@ -56,10 +56,18 @@ void FixedPoint::clear()
     pid_controller_y.clear();
 }
 
-FixedPointYolo::FixedPointYolo(const std::string &topic, const std::string &yolo_tag, fixed_point::Point center, double lock_distance, ros::NodeHandle &nh, const PidParams &params_x, const PidParams &params_y)
-    : FixedPoint("none", center, nh, params_x, params_y), yolo_tag_(yolo_tag), is_found_(false), lock_distance_(lock_distance), locked_count_(0)
+FixedPointYolo::FixedPointYolo(const std::string &topic, const std::string &yolo_tag,
+                               fixed_point::Point center, double lock_distance, ros::NodeHandle &nh,
+                               const PidParams &params_x, const PidParams &params_y, int lock_cutoff)
+    : FixedPoint("none", center, nh, params_x, params_y), yolo_tag_(yolo_tag), is_found_(false),
+      lock_distance_(lock_distance), locked_count_(0), is_dropped_(false), is_locked_(false), lock_cutoff_(lock_cutoff)
 {
     point_yolo_sub_ = nh_.subscribe<conductor::yolo>(topic, 10, &FixedPointYolo::subPointYoloCallback, this);
+}
+
+bool FixedPointYolo::is_lock_counter_reached()
+{
+    return locked_count_ > lock_cutoff_;
 }
 
 void FixedPointYolo::subPointYoloCallback(const conductor::yolo::ConstPtr &msg)
