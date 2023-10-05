@@ -3,9 +3,9 @@
 
     <arg name="transform_json_path" default="/home/orangepi/robocup_ws/src/conductor/example/json/transforms.json" />
     <arg name="waypoint_json_path" default="/home/orangepi/robocup_ws/src/conductor/example/json/rectangle_waypoint.json" />
-    <arg name="log_output" default="log" />
+    <arg name="log_output" default="screen" />
     <arg name="respawn_conductor" default="false" />
-    <arg name="is_test" default="false" />
+    <arg name="is_test" default="true" />
     <arg name="startup_delay" default="10.0" />
     <arg name="armor_kp" default="0.17" />
     <arg name="armor_kd" default="0.015" />
@@ -22,7 +22,7 @@
 
     </include>
 
-    <include file="$(find mavros)/launch/apm.launch">
+    <!-- <include file="$(find mavros)/launch/apm.launch">
     </include>
 
     <include file="$(find livox_ros_driver2)/launch_ROS1/msg_MID360.launch">
@@ -35,7 +35,7 @@
     </include>
 
     <include file="$(find rknn_yolo)/launch/rknn_yolo.launch">
-    </include>
+    </include> -->
 
     <include file="$(find dropper)/launch/dropper.launch">
     </include>

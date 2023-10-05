@@ -1,9 +1,15 @@
 #include "conductor/dropper.h"
 
 Dropper::Dropper(ros::NodeHandle &nh)
-    : nh_(nh)
+    : nh_(nh), is_allow_takeoff(false), takeoff_mode_(DropperTakeoffMode::kForbid)
 {
-    drop_pub_ = nh.advertise<std_msgs::String>("dropper", 1);
+    this->init();
+}
+
+void Dropper::init()
+{
+    drop_pub_ = nh_.advertise<std_msgs::String>("dropper", 1);
+    takeoff_sub_ = nh_.subscribe<std_msgs::String>("dropper/takeoff", 10, &Dropper::subTakeoffCallback, this);
 }
 
 Dropper::~Dropper() {}
@@ -44,4 +50,30 @@ void Dropper::drop(int num)
         break;
     }
     drop_pub_.publish(msg);
+}
+
+void Dropper::subTakeoffCallback(const std_msgs::String::ConstPtr &msg)
+{
+    std::string takeoff_cmd = msg->data;
+    if (takeoff_cmd == std::string("takeoff normal"))
+    {
+        takeoff_mode_ = DropperTakeoffMode::kNormal;
+    }
+    else if (takeoff_cmd == std::string("takeoff fallback"))
+    {
+        takeoff_mode_ = DropperTakeoffMode::kFallBack;
+    }
+    else if (takeoff_cmd == std::string("takeoff 1"))
+    {
+        takeoff_mode_ = DropperTakeoffMode::kTakeoff1;
+    }
+    else if (takeoff_cmd == std::string("takeoff 2"))
+    {
+        takeoff_mode_ = DropperTakeoffMode::kTakeoff2;
+    }
+    else
+    {
+        takeoff_mode_ = DropperTakeoffMode::kForbid;
+    }
+    is_allow_takeoff = (takeoff_mode_ != DropperTakeoffMode::kForbid);
 }

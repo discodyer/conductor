@@ -57,7 +57,8 @@ int main(int argc, char **argv)
 
     signal(SIGINT, safeSigintHandler);
 
-    double startup_delay = 0.0;
+    double startup_delay = 10.0;
+    bool is_test = false;
     PidParams pidpara_armor{0.17, 0.0, 0.015, // kp, ki, kd
                             10.0, 40, 0.0};   // windup_guard, output_bound, sample_time
 
@@ -94,6 +95,15 @@ int main(int argc, char **argv)
             ROS_WARN("Using default startup_delay: %f", startup_delay);
         }
 
+        if (nh.getParam("/robocup_guided_node/is_test", is_test))
+        {
+            ROS_INFO("Get is_test parameter: %s", is_test ? "true" : "false");
+        }
+        else
+        {
+            ROS_WARN("Using default is_test: %s", is_test ? "true" : "false");
+        }
+
         if (nh.getParam("/robocup_guided_node/armor_kp", pidpara_armor.kp))
         {
             ROS_INFO("Get armor_kp parameter: %f", pidpara_armor.kp);
@@ -113,11 +123,6 @@ int main(int argc, char **argv)
         }
     }
 
-    // startup delay
-    ros::Duration(startup_delay).sleep();
-
-    Dropper dropper(nh);
-
     // 创建 FrameManager 实例，并从 JSON 文件读取坐标变换数据
     FrameManager transformManager(transform_json_path);
 
@@ -131,20 +136,54 @@ int main(int argc, char **argv)
         break;
     }
 
-    // 检测 from body to camera_init 的变换是否存在
-    // 如果不存在就说明lio没有输出，就结束程序
-    if (!transformManager.isWorldFrameExist())
-    {
-        return false;
-    }
-
-    // 发布transform文件中的静态坐标变换
-    transformManager.publishFrameAll();
+    Dropper dropper(nh);
 
     ArduConductor apm(nh, 20.0);
 
     // wait for FCU connection
-    while (ros::ok() && !apm.current_state.connected && !is_interrupted)
+    while (ros::ok() && !apm.current_state.connected && !is_test)
+    {
+        if (is_interrupted)
+        {
+            ros::shutdown();
+            return 0;
+        }
+        ros::spinOnce();
+        apm.rate.sleep();
+    }
+    if (apm.current_state.connected)
+    {
+        ROS_INFO(SUCCESS("Drone connected!"));
+    }
+
+    // 检测 from body to camera_init 的变换是否存在
+    // 如果不存在就说明lio没有输出
+    ROS_INFO("Checking transform from body to camera_init...");
+    while (ros::ok() && !is_test)
+    {
+        if (is_interrupted)
+        {
+            ros::shutdown();
+            return 0;
+        }
+        if (!transformManager.isWorldFrameExist())
+        {
+            ROS_INFO("Wait for Lio");
+            ros::spinOnce();
+            apm.rate.sleep();
+        }
+        else
+        {
+            // 发布transform文件中的静态坐标变换
+            ROS_INFO("Publishing Frame...");
+            transformManager.publishFrameAll();
+            break;
+        }
+    }
+
+    // 等待接收起飞指令
+    ROS_INFO("Waiting for Takeoff Command");
+    while (ros::ok() && !dropper.is_allow_takeoff)
     {
         if (is_interrupted)
         {
@@ -155,7 +194,16 @@ int main(int argc, char **argv)
         apm.rate.sleep();
     }
 
-    ROS_INFO(SUCCESS("Drone connected!"));
+    // 测试退出点
+    if (is_test)
+    {
+        ROS_INFO("END TEST, Exiting....");
+        ros::shutdown();
+        return false;
+    }
+
+    // startup delay 起飞延时
+    ros::Duration(startup_delay).sleep();
 
     FixedPointYolo fixedPointArmor("filter_targets",   // 订阅话题
                                    "tent",             // 订阅Yolo标签

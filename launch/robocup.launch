@@ -8,11 +8,13 @@
     <arg name="armor_kd" />
     <arg name="log_output" default="screen" />
     <arg name="respawn_conductor" default="false" />
+    <arg name="is_test" default="false" />
 
     <node pkg="conductor" type="robocup" name="robocup_guided_node" required="$(eval not respawn_conductor)" clear_params="true" output="$(arg log_output)" respawn="$(arg respawn_conductor)">
         <param name="transform_json_path" type="string" value="$(arg transform_json_path)" />
         <param name="waypoint_json_path" type="string" value="$(arg waypoint_json_path)" />
         <param name="startup_delay" type="double" value="$(arg startup_delay)" />
+        <param name="is_test" type="bool" value="$(arg is_test)" />
         <param name="armor_kp" type="double" value="$(arg armor_kp)" />
         <param name="armor_kd" type="double" value="$(arg armor_kd)" />
 
