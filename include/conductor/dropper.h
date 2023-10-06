@@ -18,6 +18,8 @@ class Dropper
 public:
     Dropper(ros::NodeHandle &nh);
     ~Dropper();
+    void takeoffAck();
+    void beep();
     void dropAll();
     void pickAll();
     void drop(int num);
@@ -29,6 +31,8 @@ private:
     ros::NodeHandle nh_; // ROS 节点句柄
     ros::Publisher drop_pub_;
     ros::Subscriber takeoff_sub_; // 订阅器 - 起飞指令
+    ros::Publisher takeoff_pub_; // 发布器 - 起飞确认
+    ros::Publisher beep_pub_; // 发布器 - 蜂鸣器
     void subTakeoffCallback(const std_msgs::String::ConstPtr &msg);
 };
 

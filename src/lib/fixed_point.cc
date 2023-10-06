@@ -1,5 +1,6 @@
 #include "conductor/fixed_point.h"
 #include "conductor/ansi_color.h"
+#include <std_msgs/String.h>
 
 FixedPoint::FixedPoint(const std::string &topic, fixed_point::Point center, ros::NodeHandle &nh, const PidParams &params_x, const PidParams &params_y)
     : center_(center), nh_(nh), pid_controller_x(params_x.kp, params_x.ki, params_x.kd, params_x.windup_guard, params_x.output_bound, params_x.sample_time),
@@ -62,6 +63,7 @@ FixedPointYolo::FixedPointYolo(const std::string &topic, const std::string &yolo
     : FixedPoint("none", center, nh, params_x, params_y), yolo_tag_(yolo_tag), is_found_(false),
       lock_distance_(lock_distance), locked_count_(0), is_dropped_(false), is_locked_(false), lock_cutoff_(lock_cutoff)
 {
+    beep_pub_ = nh_.advertise<std_msgs::String>("dropper/beep", 1);
     point_yolo_sub_ = nh_.subscribe<conductor::yolo>(topic, 10, &FixedPointYolo::subPointYoloCallback, this);
 }
 
@@ -78,6 +80,7 @@ void FixedPointYolo::subPointYoloCallback(const conductor::yolo::ConstPtr &msg)
     if (point_yolo_.class_name == yolo_tag_)
     {
         this->is_found_ = true;
+        // this->beep();
         ROS_INFO(SUCCESS("\n--------------------------"));
         ROS_INFO(SUCCESS("\nGot a Yolo tag: %s"), point_yolo_.class_name.c_str());
         ROS_INFO(SUCCESS("\npoint \nX: %0.2f\nY: %0.2f"), point_yolo_.center_x, point_yolo_.center_y);
@@ -97,4 +100,10 @@ void FixedPointYolo::subPointYoloCallback(const conductor::yolo::ConstPtr &msg)
         ROS_INFO(SUCCESS("\nOutput \nX: %0.2f\nY: %0.2f"), last_output_.x, last_output_.y);
         ROS_INFO(SUCCESS("\n--------------------------"));
     }
+}
+
+void FixedPointYolo::beep()
+{
+    std_msgs::String msg;
+    beep_pub_.publish(msg);
 }

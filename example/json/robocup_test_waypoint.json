@@ -1,0 +1,47 @@
+{
+    "waypoints": [
+        {
+            "index": 0,
+            "info": "start",
+            "type": "PoseAbsolute",
+            "frame_id": "map",
+            "position": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "yaw": 0.0,
+            "delay": 2.0,
+            "air_speed": 0.2,
+            "range" : 0.05
+        },
+        {
+            "index": 1,
+            "info": "point4",
+            "type": "PoseAbsolute",
+            "frame_id": "map",
+            "position": {
+                "x": 5.5,
+                "y": 0.25,
+                "z": 0.0
+            },
+            "yaw": 0.0,
+            "delay": 15.0,
+            "air_speed": 0.5
+        },
+        {
+            "index": 2,
+            "info": "home",
+            "type": "PoseAbsolute",
+            "frame_id": "map",
+            "position": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "yaw": 0.0,
+            "delay": 15.0,
+            "air_speed": 0.5
+        }
+    ]
+}

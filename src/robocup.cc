@@ -62,9 +62,9 @@ int main(int argc, char **argv)
     PidParams pidpara_armor{0.17, 0.0, 0.015, // kp, ki, kd
                             10.0, 40, 0.0};   // windup_guard, output_bound, sample_time
 
-    std::string transform_json_path = "./src/conductor/example/json/transforms.json"; // 修改为你的 JSON 文件路径
+    std::string transform_json_path = "./src/conductor/example/json/transforms.json";
 
-    std::string waypoint_json_path = "./src/conductor/example/json/waypoints.json"; // 修改为你的 JSON 文件路径
+    std::string waypoint_json_path = "./src/conductor/example/json/waypoints.json";
 
     // Read parameters from launch file, including: transformJsonFilePath, waypointJsonFilePath
     {
@@ -194,6 +194,9 @@ int main(int argc, char **argv)
         apm.rate.sleep();
     }
 
+    dropper.takeoffAck();
+    dropper.beep();
+
     // 测试退出点
     if (is_test)
     {
@@ -221,8 +224,8 @@ int main(int argc, char **argv)
     waypoint::Waypoint waypoint_snapshot_target;                    // 目标点悬停位置（参考摄像头中心）
     waypoint::Waypoint waypoint_snapshot_drop_waypoint;             // 目标投放位置
     waypoint::Position waypoint_dropper_1_offset{0.2, -0.3, -0.08}; // 1号左侧投掷物偏移
-    waypoint::Position waypoint_dropper_2_offset{0.1, 0.0, 0.3};    // 2号中间投掷物偏移
-    waypoint::Position waypoint_dropper_3_offset{0.0, 0.1, 0.3};    // 3号右侧投掷物偏移
+    waypoint::Position waypoint_dropper_2_offset{0.35, 0.0, -0.13}; // 2号中间投掷物偏移
+    waypoint::Position waypoint_dropper_3_offset{0.2, 0.3, -0.08};  // 3号右侧投掷物偏移
 
     // 重置上一次操作的时间为当前时刻
     apm.last_request = ros::Time::now();
@@ -248,7 +251,7 @@ int main(int argc, char **argv)
             if (apm.takeoff(0.5, 1.0, 3.0)) // 起飞到1m高度
             {
                 apm.mission_state = MissionState::kPose;
-                ros::Duration(2.0).sleep();
+                ros::Duration(1.0).sleep();
                 ROS_INFO(MISSION_SWITCH_TO("pose"));
                 waypointManager.resetDelayTime();
             }
@@ -300,6 +303,24 @@ int main(int argc, char **argv)
                 break;
             }
 
+            // if (fixedPointArmor.is_lock_counter_reached() && !fixedPointArmor.is_locked_)
+            // {
+            //     apm.setBreak();
+            //     fixedPointArmor.is_locked_ = true;
+            //     ROS_INFO("is_lock_counter_reached");
+            //     // 记录目标点悬停位置（参考摄像头中心）
+            //     waypoint_snapshot_target = transformManager.getCurrentPoseWorld();
+            //     // 移动到偏移位置
+            //     waypoint_snapshot_drop_waypoint = waypoint_snapshot_target;
+            //     waypoint_snapshot_drop_waypoint.position.x += waypoint_dropper_1_offset.x;
+            //     waypoint_snapshot_drop_waypoint.position.y += waypoint_dropper_1_offset.y;
+            //     waypoint_snapshot_drop_waypoint.position.z = waypoint_dropper_1_offset.z;
+            //     waypoint_snapshot_drop_waypoint.air_speed = 0.1;
+            //     apm.setPoseWorld(waypoint_snapshot_drop_waypoint);
+            //     apm.updateLastRequestTime();
+            //     break;
+            // }
+
             if (fixedPointArmor.is_lock_counter_reached() && !fixedPointArmor.is_locked_)
             {
                 apm.setBreak();
@@ -309,9 +330,9 @@ int main(int argc, char **argv)
                 waypoint_snapshot_target = transformManager.getCurrentPoseWorld();
                 // 移动到偏移位置
                 waypoint_snapshot_drop_waypoint = waypoint_snapshot_target;
-                waypoint_snapshot_drop_waypoint.position.x += waypoint_dropper_1_offset.x;
-                waypoint_snapshot_drop_waypoint.position.y += waypoint_dropper_1_offset.y;
-                waypoint_snapshot_drop_waypoint.position.z = waypoint_dropper_1_offset.z;
+                waypoint_snapshot_drop_waypoint.position.x += waypoint_dropper_2_offset.x;
+                waypoint_snapshot_drop_waypoint.position.y += waypoint_dropper_2_offset.y;
+                waypoint_snapshot_drop_waypoint.position.z = waypoint_dropper_2_offset.z;
                 waypoint_snapshot_drop_waypoint.air_speed = 0.1;
                 apm.setPoseWorld(waypoint_snapshot_drop_waypoint);
                 apm.updateLastRequestTime();
@@ -335,22 +356,26 @@ int main(int argc, char **argv)
             }
             else
             {
-                ROS_INFO(COLORED_TEXT("distance: %0.2f", ANSI_BACKGROUND_RED), waypoint::calculateDistance(
-                                                                                   transformManager.getCurrentPoseWorld(),
-                                                                                   waypoint_snapshot_drop_waypoint));
+                ROS_INFO(
+                    COLORED_TEXT(
+                        "distance: %0.2f",
+                        ANSI_BACKGROUND_RED),
+                    waypoint::calculateDistance(
+                        transformManager.getCurrentPoseWorld(),
+                        waypoint_snapshot_drop_waypoint));
             }
 
             break;
 
         case MissionState::kWayback:
-            apm.setMoveSpeed(0.2); // 设置空速
+            apm.setMoveSpeed(0.5); // 设置空速
             apm.setPoseWorld(0.0, 0.0, 0.5, 0.0);
             apm.mission_state = MissionState::kLand; // 状态机切换
             apm.updateLastRequestTime();
             break;
 
         case MissionState::kLand:
-            if (apm.land(5.0)) // 10s后降落
+            if (apm.land(10.0)) // 10s后降落
             {
                 ros::shutdown();
             }

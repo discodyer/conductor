@@ -10,6 +10,21 @@ void Dropper::init()
 {
     drop_pub_ = nh_.advertise<std_msgs::String>("dropper", 1);
     takeoff_sub_ = nh_.subscribe<std_msgs::String>("dropper/takeoff", 10, &Dropper::subTakeoffCallback, this);
+    takeoff_pub_ = nh_.advertise<std_msgs::String>("dropper/takeoff", 1);
+    beep_pub_ = nh_.advertise<std_msgs::String>("dropper/beep", 1);
+}
+
+void Dropper::takeoffAck()
+{
+    std_msgs::String msg;
+    msg.data = std::string("ok");
+    takeoff_pub_.publish(msg);
+}
+
+void Dropper::beep()
+{
+    std_msgs::String msg;
+    beep_pub_.publish(msg);
 }
 
 Dropper::~Dropper() {}
