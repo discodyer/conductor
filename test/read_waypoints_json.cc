@@ -15,7 +15,7 @@ int main(int argc, char **argv)
 
     FrameManager transformManager(transformJsonFilePath);
 
-    std::string waypointJsonFilePath = "/home/orangepi/robocup_ws/src/conductor/example/json/rectangle_waypoint.json"; // 修改为你的 JSON 文件路径
+    std::string waypointJsonFilePath = "/home/orangepi/robocup_ws/src/conductor/example/json/robocup_waypoint_1.json"; // 修改为你的 JSON 文件路径
 
     // 创建 WaypointManager 实例，并从 JSON 文件读取航点数据
     WaypointManager waypointManager(waypointJsonFilePath);

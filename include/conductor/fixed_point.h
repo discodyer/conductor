@@ -82,12 +82,17 @@ public:
     int lock_cutoff_;
     double lock_distance_;
     void beep();
+    void reset();
+    void updateTime();
+    bool isTimeout();
+    int timeout_count_;
 
 protected:
     ros::Subscriber point_yolo_sub_;                                 // 订阅器 - 自定义消息类型
     conductor::yolo point_yolo_;                                     // 目标点数据 - 自定义消息类型
     ros::Publisher beep_pub_;                                        // 发布器 - 蜂鸣器
     std::string yolo_tag_;                                           // 订阅的yolo标签
+    ros::Time last_frame_time_;
     void subPointYoloCallback(const conductor::yolo::ConstPtr &msg); // 消息订阅回调函数
 };
 

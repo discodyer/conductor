@@ -12,8 +12,11 @@ enum class MissionState
     kTakeoff,
     kPose,
     kLand,
-    kTarget,
-    kWayback
+    kTargetArmor,
+    kTargetBridge,
+    kTargetFort,
+    kReturnPose,
+    kWaybackHome
 };
 
 #endif // MISSION_STATE_H

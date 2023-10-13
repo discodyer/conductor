@@ -1,0 +1,89 @@
+{
+    "waypoints": [
+        {
+            "index": 0,
+            "info": "start",
+            "type": "PoseAbsolute",
+            "frame_id": "map",
+            "position": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.2
+            },
+            "yaw": 0.0,
+            "delay": 2.0,
+            "air_speed": 0.2,
+            "range" : 0.05
+        },
+        {
+            "index": 1,
+            "info": "point4",
+            "type": "PoseAbsolute",
+            "frame_id": "map",
+            "position": {
+                "x": 1.1,
+                "y": -3.35,
+                "z": 0.2
+            },
+            "yaw": 0.0,
+            "delay": 10.0,
+            "air_speed": 0.5
+        },
+        {
+            "index": 2,
+            "info": "point3",
+            "type": "PoseAbsolute",
+            "frame_id": "map",
+            "position": {
+                "x": 4.6,
+                "y": -2.95,
+                "z": 0.2
+            },
+            "yaw": 0.0,
+            "delay": 10.0,
+            "air_speed": 0.5
+        },
+        {
+            "index": 3,
+            "info": "point2",
+            "type": "PoseAbsolute",
+            "frame_id": "map",
+            "position": {
+                "x": 4.4,
+                "y": 0.65,
+                "z": 0.2
+            },
+            "yaw": 0.0,
+            "delay": 10.0,
+            "air_speed": 0.5
+        },
+        {
+            "index": 4,
+            "info": "point1",
+            "type": "PoseAbsolute",
+            "frame_id": "map",
+            "position": {
+                "x": 2.3,
+                "y": 1.45,
+                "z": 0.2
+            },
+            "yaw": 0.0,
+            "delay": 10.0,
+            "air_speed": 0.5
+        },
+        {
+            "index": 5,
+            "info": "home",
+            "type": "PoseAbsolute",
+            "frame_id": "map",
+            "position": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.2
+            },
+            "yaw": 0.0,
+            "delay": 10.0,
+            "air_speed": 0.5
+        }
+    ]
+}

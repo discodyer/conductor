@@ -2,23 +2,25 @@
     <!-- vim: set ft=xml noet : -->
 
     <arg name="transform_json_path" default="/home/orangepi/robocup_ws/src/conductor/example/json/transforms.json" />
-    <arg name="waypoint_json_path" default="/home/orangepi/robocup_ws/src/conductor/example/json/rectangle_waypoint.json" />
+    <arg name="waypoint_json_path_1" default="/home/orangepi/robocup_ws/src/conductor/example/json/robocup_waypoint_1.json" />
+    <arg name="waypoint_json_path_2" default="/home/orangepi/robocup_ws/src/conductor/example/json/robocup_waypoint_2.json" />
+    <arg name="waypoint_json_path_3" default="/home/orangepi/robocup_ws/src/conductor/example/json/robocup_waypoint_3.json" />
+    <arg name="waypoint_json_path_4" default="/home/orangepi/robocup_ws/src/conductor/example/json/robocup_waypoint_4.json" />
     <arg name="log_output" default="screen" />
     <arg name="respawn_conductor" default="false" />
     <arg name="is_test" default="true" />
     <arg name="startup_delay" default="10.0" />
-    <arg name="armor_kp" default="0.17" />
-    <arg name="armor_kd" default="0.015" />
 
     <include file="$(find conductor)/launch/robocup.launch">
         <arg name="transform_json_path" value="$(arg transform_json_path)" />
-        <arg name="waypoint_json_path" value="$(arg waypoint_json_path)" />
+        <arg name="waypoint_json_path_1" value="$(arg waypoint_json_path_1)" />
+        <arg name="waypoint_json_path_2" value="$(arg waypoint_json_path_2)" />
+        <arg name="waypoint_json_path_3" value="$(arg waypoint_json_path_3)" />
+        <arg name="waypoint_json_path_4" value="$(arg waypoint_json_path_4)" />
         <arg name="log_output" value="$(arg log_output)" />
         <arg name="respawn_conductor" value="$(arg respawn_conductor)" />
         <arg name="is_test" value="$(arg is_test)" />
         <arg name="startup_delay" value="$(arg startup_delay)" />
-        <arg name="armor_kp" value="$(arg armor_kp)" />
-        <arg name="armor_kd" value="$(arg armor_kd)" />
 
     </include>
 

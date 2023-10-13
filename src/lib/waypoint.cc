@@ -193,7 +193,7 @@ bool WaypointManager::goToNextWaypoint()
     if (current_waypoint_index_ < waypoints_.size() - 1)
     {
         // 更新上一次航点发布的时间戳
-        last_waypoint_time_ = ros::Time::now();
+        this->resetDelayTime();
 
         // 转到下一个航点
         current_waypoint_index_++;

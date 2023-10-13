@@ -1,7 +1,7 @@
 <launch>
     <!-- vim: set ft=xml noet : -->
 
-    <include file="$(find mavros)/launch/apm.launch">
+    <!-- <include file="$(find mavros)/launch/apm.launch">
     </include>
 
     <include file="$(find livox_ros_driver2)/launch_ROS1/msg_MID360.launch">
@@ -37,7 +37,7 @@
         <arg name="is_test" value="$(arg is_test)" />
         <arg name="startup_delay" value="$(arg startup_delay)" />
 
-    </include>
+    </include> -->
 
     <include file="$(find rknn_yolo)/launch/rknn_yolo.launch">
     </include>
